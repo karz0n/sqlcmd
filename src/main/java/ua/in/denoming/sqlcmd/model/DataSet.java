@@ -1,6 +1,7 @@
 package ua.in.denoming.sqlcmd.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class DataSet {
@@ -33,23 +34,20 @@ public class DataSet {
             return Objects.equals(name, other.name) && Objects.equals(value, other.value);
         }
 
-        Data(String name, Object value) {
+        public Data(String name, Object value) {
             this.name = name;
             this.value = value;
         }
 
-        @SuppressWarnings("unused")
         public String getName() {
             return name;
         }
 
-        @SuppressWarnings("WeakerAccess")
         public Object getValue() {
             return value;
         }
     }
 
-    @SuppressWarnings("unused")
     public DataSet() {
         this(0);
     }
@@ -58,16 +56,20 @@ public class DataSet {
         this.storage = new ArrayList<>(capacity);
     }
 
+    public DataSet(Data... values) {
+        this.storage = new ArrayList<>(
+            Arrays.asList(values)
+        );
+    }
+
     public void put(String name, Object value) {
         storage.add(new Data(name, value));
     }
 
-    @SuppressWarnings("unused")
     public void set(int index, Data data) {
         storage.set(index, data);
     }
 
-    @SuppressWarnings("unused")
     public Data get(int index) {
         return this.storage.get(index);
     }
@@ -90,7 +92,6 @@ public class DataSet {
         return names;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public Object[] getValues() {
         if (storage.size() == 0) {
             return new Object[0];
