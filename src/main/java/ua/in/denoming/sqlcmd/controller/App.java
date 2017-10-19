@@ -27,16 +27,19 @@ class App implements Runnable, AutoCloseable {
 
     static App getInstance() throws Exception {
         if (App.instance == null) {
-            App.instance = new App();
+            App.instance = new App(
+                new JdbcDatabaseManager(
+                    new PostgreSqlErrorStates(), "org.postgresql.Driver"
+                ),
+                new Console()
+            );
         }
         return App.instance;
     }
 
-    private App() throws Exception {
-        this.view = new Console();
-        this.databaseManager = new JdbcDatabaseManager(
-            new PostgreSqlErrorStates(), "org.postgresql.Driver"
-        );
+    private App(DatabaseManager databaseManager, View view) throws Exception {
+        this.view = view;
+        this.databaseManager = databaseManager;
     }
 
     private void doConnect(String url, String user, String password) {
