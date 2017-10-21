@@ -9,6 +9,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
 
+/**
+ *
+ */
 public final class JdbcDatabaseManager implements DatabaseManager {
     private ErrorStates errorStates;
     private Connection connection;
@@ -125,6 +128,19 @@ public final class JdbcDatabaseManager implements DatabaseManager {
     }
 
     @Override
+    public boolean isTableExists(String tableName) throws DatabaseException {
+        ArrayList<TableDescription> tables = getTables();
+        boolean found = false;
+        for (TableDescription table: tables) {
+            if (table.getName().equalsIgnoreCase(tableName)) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+    @Override
     public ArrayList<DataSet> obtainTableData(String tableName) throws DatabaseException {
         try (
             Statement statement = connection.createStatement()
@@ -209,7 +225,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
     }
 
     private static String getReceivingDataString(String tableName) {
-        return "SELECT FROM ".concat(tableName);
+        return "SELECT * FROM ".concat(tableName);
     }
 
     private static String getInsertingDataString(String tableName, DataSet dataSet) {
