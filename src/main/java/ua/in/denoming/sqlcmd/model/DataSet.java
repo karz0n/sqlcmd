@@ -25,9 +25,7 @@ public class DataSet {
         public boolean equals(Object otherObject) {
             if (this == otherObject)
                 return true;
-            if (otherObject == null)
-                return false;
-            if (getClass() != otherObject.getClass())
+            if (otherObject == null || getClass() != otherObject.getClass())
                 return false;
 
             Data other = (Data) otherObject;
@@ -119,5 +117,21 @@ public class DataSet {
             builder.append('\t').append(data.toString()).append(System.lineSeparator());
         }
         return builder.append("}").toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        DataSet dataSet = (DataSet) o;
+        return Objects.equals(storage, dataSet.storage);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(storage);
     }
 }
