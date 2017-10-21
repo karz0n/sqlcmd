@@ -19,6 +19,8 @@ public interface DatabaseManager {
 
     void deleteTable(String tableName) throws DatabaseException;
 
+    boolean isTableExists(String tableName) throws DatabaseException;
+
     ArrayList<DataSet> obtainTableData(String tableName) throws DatabaseException;
 
     void insertData(String tableName, DataSet dataSet) throws DatabaseException;
