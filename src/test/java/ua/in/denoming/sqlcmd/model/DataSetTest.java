@@ -1,9 +1,5 @@
-package model;
+package ua.in.denoming.sqlcmd.model;
 
-import ua.in.denoming.sqlcmd.model.DataSet;
-import ua.in.denoming.sqlcmd.model.DataSet.Data;
-
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,16 +14,21 @@ class DataSetTest {
     @BeforeEach
     void setup() {
         dataSet = new DataSet(
-            new Data("column1", "value1"),
-            new Data("column2", "value2"),
-            new Data("column3", "value3")
+            new DataSet.Data("column1", "value1"),
+            new DataSet.Data("column2", "value2"),
+            new DataSet.Data("column3", "value3")
         );
     }
 
     @Test
-    void testEmpty() {
+    void testSizeOfEmpty() {
         DataSet emptyDataSet = new DataSet();
         assertEquals(0, emptyDataSet.size());
+    }
+
+    @Test
+    void testSize() {
+        assertEquals(3, dataSet.size());
     }
 
     @Test
@@ -48,9 +49,9 @@ class DataSetTest {
 
     @Test
     void testSet() {
-        dataSet.set(0, new Data("column4", "value4"));
-        dataSet.set(1, new Data("column5", "value5"));
-        dataSet.set(2, new Data("column6", "value6"));
+        dataSet.set(0, new DataSet.Data("column4", "value4"));
+        dataSet.set(1, new DataSet.Data("column5", "value5"));
+        dataSet.set(2, new DataSet.Data("column6", "value6"));
 
         assertAll("Index 0",
             () -> assertEquals("column4", dataSet.get(0).getName()),
@@ -64,11 +65,6 @@ class DataSetTest {
             () -> assertEquals("column6", dataSet.get(2).getName()),
             () -> assertEquals("value6", dataSet.get(2).getValue())
         );
-    }
-
-    @Test
-    void testGetSize() {
-        assertEquals(3, dataSet.size());
     }
 
     @Test

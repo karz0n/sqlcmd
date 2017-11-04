@@ -1,14 +1,11 @@
-package model;
+package ua.in.denoming.sqlcmd.model;
 
-import java.util.logging.Logger;
-
-import org.junit.jupiter.api.*;
-
-import ua.in.denoming.sqlcmd.model.DataSet;
-import ua.in.denoming.sqlcmd.model.DataSet.Data;
-import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.JdbcDatabaseManager;
-import ua.in.denoming.sqlcmd.model.PostgreSqlErrorStates;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.ArrayList;
 
@@ -51,8 +48,8 @@ class JdbcDatabaseManagerTest {
     class AfterTableCreating {
         private final String TABLE_NAME = "TEST_TABLE";
         private final DataSet TABLE_DATA = new DataSet(
-            new Data("column1", "value1"),
-            new Data("column2", "value2")
+            new DataSet.Data("column1", "value1"),
+            new DataSet.Data("column2", "value2")
         );
 
         @BeforeAll
@@ -129,8 +126,8 @@ class JdbcDatabaseManagerTest {
                     assertEquals(1, dataSets.size());
 
                     DataSet dataSet = new DataSet(
-                        new Data(column, value),
-                        new Data(TABLE_DATA.get(1).getName(), TABLE_DATA.get(1).getValue())
+                        new DataSet.Data(column, value),
+                        new DataSet.Data(TABLE_DATA.get(1).getName(), TABLE_DATA.get(1).getValue())
                     );
                     assertEquals(dataSets.get(0), dataSet);
                 } catch (Throwable throwable) {
