@@ -10,6 +10,12 @@ public class Console implements View {
     }
 
     @Override
+    public View throwing(Throwable throwable) {
+        throwable.printStackTrace(System.out);
+        return this;
+    }
+
+    @Override
     public View write(String message) {
         System.out.print(message);
         return this;

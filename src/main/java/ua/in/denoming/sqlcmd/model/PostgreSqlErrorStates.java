@@ -2,7 +2,7 @@ package ua.in.denoming.sqlcmd.model;
 
 public final class PostgreSqlErrorStates implements ErrorStates {
     @Override
-    public boolean isPasswordIncorrect(String state) {
+    public boolean isWrongPassword(String state) {
         return state.equalsIgnoreCase("28P01");
     }
 

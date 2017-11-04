@@ -2,7 +2,7 @@ package ua.in.denoming.sqlcmd.model;
 
 import ua.in.denoming.sqlcmd.model.exception.DatabaseException;
 import ua.in.denoming.sqlcmd.model.exception.DatabaseNotFoundException;
-import ua.in.denoming.sqlcmd.model.exception.IncorrectPasswordException;
+import ua.in.denoming.sqlcmd.model.exception.WrongPasswordException;
 
 import java.io.PrintWriter;
 import java.sql.*;
@@ -34,11 +34,14 @@ public final class JdbcDatabaseManager implements DatabaseManager {
     @Override
     public void open(String url, String user, String password) throws DatabaseException {
         try {
+            if (isOpen()) {
+                connection.close();
+            }
             connection = DriverManager.getConnection(url, getConnectionProperties(user, password));
         } catch (SQLException e) {
             String errorState = e.getSQLState();
-            if (errorStates.isPasswordIncorrect(errorState)) {
-                throw new IncorrectPasswordException();
+            if (errorStates.isWrongPassword(errorState)) {
+                throw new WrongPasswordException();
             }
             if (errorStates.isDatabaseNotFound(errorState)) {
                 throw new DatabaseNotFoundException();
@@ -61,7 +64,11 @@ public final class JdbcDatabaseManager implements DatabaseManager {
 
     @Override
     public boolean isOpen() {
-        return (connection != null);
+        try {
+            return (connection != null && !connection.isClosed());
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     @Override
@@ -199,7 +206,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             String deletingDataString = JdbcDatabaseManager.getDeletingDataString(tableName, column, searchValue);
             statement.executeUpdate(deletingDataString);
         } catch (SQLException e) {
-            throw new DatabaseException("Delete row in table", e);
+            throw new DatabaseException("Drop row in table", e);
         }
     }
 
