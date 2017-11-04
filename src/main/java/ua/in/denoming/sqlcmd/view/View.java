@@ -1,6 +1,9 @@
 package ua.in.denoming.sqlcmd.view;
 
 public interface View {
+    @SuppressWarnings("UnusedReturnValue")
+    View throwing(Throwable throwable);
+
     View write(String message);
 
     @SuppressWarnings("unused")
