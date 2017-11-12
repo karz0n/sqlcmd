@@ -6,13 +6,19 @@ public interface View {
 
     View write(String message);
 
-    @SuppressWarnings("unused")
-    View writeFormat(String format, Object... objects);
-
-    View writeLine(String message);
+    default View writeLine(String message) {
+        write(message);
+        return line();
+    }
 
     @SuppressWarnings("UnusedReturnValue")
-    View writeFormatLine(String format, Object... objects);
+    View writeFormat(String format, Object... objects);
+
+    @SuppressWarnings("UnusedReturnValue")
+    default View writeFormatLine(String format, Object... objects) {
+        writeFormat(format, objects);
+        return line();
+    }
 
     View line();
 

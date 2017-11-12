@@ -28,18 +28,6 @@ public class Console implements View {
     }
 
     @Override
-    public View writeLine(String message) {
-        System.out.println(message);
-        return this;
-    }
-
-    @Override
-    public View writeFormatLine(String format, Object... objects) {
-        System.out.printf(format, objects);
-        return this.line();
-    }
-
-    @Override
     public View line() {
         System.out.println();
         return this;

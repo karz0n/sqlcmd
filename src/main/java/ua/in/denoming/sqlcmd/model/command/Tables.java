@@ -1,7 +1,6 @@
 package ua.in.denoming.sqlcmd.model.command;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.DatabaseException;
 import ua.in.denoming.sqlcmd.view.View;
 
 public class Tables implements Command {
@@ -14,7 +13,7 @@ public class Tables implements Command {
     }
 
     @Override
-    public void execute(String... args) throws DatabaseException {
+    public void execute(String... args) {
         String tables = databaseManager.getTables().toString();
         view.writeLine(tables);
     }

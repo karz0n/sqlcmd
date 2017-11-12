@@ -2,6 +2,7 @@ package ua.in.denoming.sqlcmd.model;
 
 import ua.in.denoming.sqlcmd.model.command.Command;
 import ua.in.denoming.sqlcmd.model.exception.CommandNotFoundException;
+import ua.in.denoming.sqlcmd.model.exception.NotConnectedException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public class InputHandler {
             try {
                 String[] parts = read();
 
-                String token = parts[0];
+                String token = parts[0].toLowerCase();
                 if (getExitToken().equalsIgnoreCase(token)) {
                     if (exitBanner != null) {
                         view.writeLine(exitBanner);
@@ -41,9 +42,13 @@ public class InputHandler {
                     throw new CommandNotFoundException();
                 }
 
-                commands.get(token).execute(
-                    Arrays.copyOfRange(parts, 1, parts.length)
-                );
+                try {
+                    commands.get(token).execute(
+                        Arrays.copyOfRange(parts, 1, parts.length)
+                    );
+                } catch (NotConnectedException e) {
+                    view.writeLine("First need to establish connection");
+                }
             } catch (Exception e) {
                 view.throwing(e);
             }
@@ -76,6 +81,6 @@ public class InputHandler {
     }
 
     private String normalize(String input) {
-        return input.trim().toLowerCase();
+        return input.trim();
     }
 }

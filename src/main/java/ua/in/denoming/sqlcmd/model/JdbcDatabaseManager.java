@@ -2,6 +2,7 @@ package ua.in.denoming.sqlcmd.model;
 
 import ua.in.denoming.sqlcmd.model.exception.DatabaseException;
 import ua.in.denoming.sqlcmd.model.exception.DatabaseNotFoundException;
+import ua.in.denoming.sqlcmd.model.exception.NotConnectedException;
 import ua.in.denoming.sqlcmd.model.exception.WrongPasswordException;
 
 import java.io.PrintWriter;
@@ -71,14 +72,23 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         }
     }
 
+    /**
+     * Get list of tables
+     *
+     * @return list of tables
+     * @throws NotConnectedException if connection wasn't established
+     * @throws DatabaseException     if there is database exception
+     */
     @Override
-    public ArrayList<TableDescription> getTables() throws DatabaseException {
+    public ArrayList<TableDescription> getTables() {
+        if (!isOpen()) {
+            throw new NotConnectedException();
+        }
         try {
             DatabaseMetaData metaData = connection.getMetaData();
             try (
                 ResultSet rs = metaData.getTables(
-                    null, null, null,
-                    new String[]{"TABLE"})
+                    null, null, null, new String[]{"TABLE"})
             ) {
                 ArrayList<TableDescription> output = new ArrayList<>();
                 while (rs.next()) {
@@ -98,8 +108,19 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         }
     }
 
+    /**
+     * Create new table
+     *
+     * @param tableName name of table
+     * @param columns   list of columns in table
+     * @throws NotConnectedException if connection wasn't established
+     * @throws DatabaseException     if there is database exception
+     */
     @Override
-    public void createTable(String tableName, String... columns) throws DatabaseException {
+    public void createTable(String tableName, String... columns) {
+        if (!isOpen()) {
+            throw new NotConnectedException();
+        }
         try (
             Statement statement = connection.createStatement()
         ) {
@@ -110,8 +131,18 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         }
     }
 
+    /**
+     * Clear data of table
+     *
+     * @param tableName name of table
+     * @throws NotConnectedException if connection wasn't established
+     * @throws DatabaseException     if there is database exception
+     */
     @Override
-    public void clearTable(String tableName) throws DatabaseException {
+    public void clearTable(String tableName) {
+        if (!isOpen()) {
+            throw new NotConnectedException();
+        }
         try (
             Statement statement = connection.createStatement()
         ) {
@@ -122,8 +153,18 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         }
     }
 
+    /**
+     * Delete table
+     *
+     * @param tableName name of table
+     * @throws NotConnectedException if connection wasn't established
+     * @throws DatabaseException     if there is database exception
+     */
     @Override
-    public void deleteTable(String tableName) throws DatabaseException {
+    public void deleteTable(String tableName) {
+        if (!isOpen()) {
+            throw new NotConnectedException();
+        }
         try (
             Statement statement = connection.createStatement()
         ) {
@@ -134,11 +175,21 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         }
     }
 
+    /**
+     * Check table exists
+     * @param tableName name of table
+     * @return result of table existence checking
+     * @throws NotConnectedException if connection wasn't established
+     */
     @Override
-    public boolean isTableExists(String tableName) throws DatabaseException {
+    public boolean isTableExists(String tableName) {
+        if (!isOpen()) {
+            throw new NotConnectedException();
+        }
+
         ArrayList<TableDescription> tables = getTables();
         boolean found = false;
-        for (TableDescription table: tables) {
+        for (TableDescription table : tables) {
             if (table.getName().equalsIgnoreCase(tableName)) {
                 found = true;
                 break;
@@ -147,8 +198,18 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         return found;
     }
 
+    /**
+     * Obtain list of table data sets
+     * @param tableName name of table
+     * @return set of data
+     * @throws NotConnectedException if connection wasn't established
+     * @throws DatabaseException     if there is database exception
+     */
     @Override
-    public ArrayList<DataSet> obtainTableData(String tableName) throws DatabaseException {
+    public ArrayList<DataSet> obtainTableData(String tableName) {
+        if (!isOpen()) {
+            throw new NotConnectedException();
+        }
         try (
             Statement statement = connection.createStatement()
         ) {
@@ -174,8 +235,18 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         }
     }
 
+    /**
+     * Insert data set to table
+     * @param tableName name of table
+     * @param dataSet set of data
+     * @throws NotConnectedException if connection wasn't established
+     * @throws DatabaseException     if there is database exception
+     */
     @Override
-    public void insertData(String tableName, DataSet dataSet) throws DatabaseException {
+    public void insertData(String tableName, DataSet dataSet) {
+        if (!isOpen()) {
+            throw new NotConnectedException();
+        }
         try (
             Statement statement = connection.createStatement()
         ) {
@@ -186,8 +257,20 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         }
     }
 
+    /**
+     * Update table
+     * @param tableName name of table
+     * @param column specific column name
+     * @param searchValue value to search in specific column
+     * @param value new value
+     * @throws NotConnectedException if connection wasn't established
+     * @throws DatabaseException     if there is database exception
+     */
     @Override
-    public void updateData(String tableName, String column, String searchValue, String value) throws DatabaseException {
+    public void updateData(String tableName, String column, String searchValue, String value) {
+        if (!isOpen()) {
+            throw new NotConnectedException();
+        }
         try (
             Statement statement = connection.createStatement()
         ) {
@@ -198,8 +281,19 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         }
     }
 
+    /**
+     * Delete data in table
+     * @param tableName name of table
+     * @param column specific column name
+     * @param searchValue value to search in specific column
+     * @throws NotConnectedException if connection wasn't established
+     * @throws DatabaseException     if there is database exception
+     */
     @Override
-    public void deleteData(String tableName, String column, String searchValue) throws DatabaseException {
+    public void deleteData(String tableName, String column, String searchValue) {
+        if (!isOpen()) {
+            throw new NotConnectedException();
+        }
         try (
             Statement statement = connection.createStatement()
         ) {

@@ -12,7 +12,6 @@ public class Help implements Command {
     @Override
     public void execute(String... args) {
         view.writeLine("Usage: <command> [<param1> <param2> ...]")
-            .line()
             .indent(1).writeLine("Commands:")
             .indent(2).write("connect").indent().writeLine("<url> <username> <password>")
             .indent(3).writeLine("connect to database")
@@ -35,7 +34,6 @@ public class Help implements Command {
             .indent(2).writeLine("help")
             .indent(3).writeLine("print this help")
             .indent(2).writeLine("exit")
-            .indent(3).writeLine("quit from program")
-            .line();
+            .indent(3).writeLine("quit from program");
     }
 }

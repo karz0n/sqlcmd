@@ -7,7 +7,6 @@ import org.nocrala.tools.texttablefmt.Table;
 
 import ua.in.denoming.sqlcmd.model.DataSet;
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.DatabaseException;
 import ua.in.denoming.sqlcmd.model.exception.WrongCountOfArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
@@ -49,7 +48,7 @@ public class Find implements Command {
     }
 
     @Override
-    public void execute(String... args) throws DatabaseException {
+    public void execute(String... args) {
         checkArgs(args);
 
         String tableName = args[0];
