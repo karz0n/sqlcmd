@@ -1,23 +1,8 @@
-# User-specific stuff:
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/codeStyleSettings.xml
-.idea/dictionaries
-.idea/libraries
-
-# Sensitive or high-churn files:
-.idea/**/dataSources/
-.idea/**/dataSources.ids
-.idea/**/dataSources.xml
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xml
-.idea/**/dynamic.xml
-.idea/**/uiDesigner.xml
+## User-specific stuff:
+.idea/
 
 ## File-based project format:
 *.iws
 
-## Plugin-specific files:
-
-# IntelliJ
-out/
+## Out dir
+target/
