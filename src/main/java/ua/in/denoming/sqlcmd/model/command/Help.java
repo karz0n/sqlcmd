@@ -10,6 +10,11 @@ public class Help implements Command {
     }
 
     @Override
+    public boolean canExecute(String... args) {
+        return true;
+    }
+
+    @Override
     public void execute(String... args) {
         view.writeLine("Usage: <command> [<param1> <param2> ...]")
             .indent(1).writeLine("Commands:")

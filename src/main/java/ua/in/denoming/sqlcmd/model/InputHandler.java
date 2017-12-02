@@ -3,6 +3,7 @@ package ua.in.denoming.sqlcmd.model;
 import ua.in.denoming.sqlcmd.model.command.Command;
 import ua.in.denoming.sqlcmd.model.exception.CommandNotFoundException;
 import ua.in.denoming.sqlcmd.model.exception.NotConnectedException;
+import ua.in.denoming.sqlcmd.model.exception.WrongCountOfArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import java.util.Arrays;
@@ -28,24 +29,28 @@ public class InputHandler {
         }
         while (true) {
             try {
-                String[] parts = read();
+                String[] parts = nextCommand().split("\\s+");
 
-                String token = parts[0].toLowerCase();
-                if (getExitToken().equalsIgnoreCase(token)) {
+                String commandName = parts[0].toLowerCase();
+                if (getExitToken().equalsIgnoreCase(commandName)) {
                     if (exitBanner != null) {
                         view.writeLine(exitBanner);
                     }
                     break;
                 }
-
-                if (!commands.containsKey(token)) {
+                if (!commands.containsKey(commandName)) {
                     throw new CommandNotFoundException();
                 }
 
                 try {
-                    commands.get(token).execute(
-                        Arrays.copyOfRange(parts, 1, parts.length)
-                    );
+                    Command command = commands.get(commandName);
+
+                    String[] args = Arrays.copyOfRange(parts, 1, parts.length);
+                    if (!command.canExecute(args)) {
+                        throw new WrongCountOfArgumentsException();
+                    }
+
+                    command.execute(args);
                 } catch (NotConnectedException e) {
                     view.writeLine("First need to establish connection");
                 }
@@ -75,12 +80,7 @@ public class InputHandler {
         return exitToken;
     }
 
-    private String[] read() {
-        String line = view.readLine();
-        return normalize(line).split("\\s+");
-    }
-
-    private String normalize(String input) {
-        return input.trim();
+    private String nextCommand() {
+        return view.readLine().trim();
     }
 }

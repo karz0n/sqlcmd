@@ -16,20 +16,17 @@ public class Connect implements Command {
     }
 
     @Override
-    public void execute(String... args) {
-        checkArgs(args);
+    public boolean canExecute(String... args) {
+        return (args.length == ARGUMENTS_COUNT_CONSTRAINT);
+    }
 
+    @Override
+    public void execute(String... args) {
         String url = args[0];
         String user = args[1];
         String password = args[2];
         databaseManager.open(url, user, password);
 
         view.writeLine("Database has opened successfully");
-    }
-
-    private void checkArgs(String... args) {
-        if (args.length != ARGUMENTS_COUNT_CONSTRAINT) {
-            throw new WrongCountOfArgumentsException(ARGUMENTS_COUNT_CONSTRAINT, args.length);
-        }
     }
 }

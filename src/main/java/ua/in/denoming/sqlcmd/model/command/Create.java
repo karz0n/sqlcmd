@@ -1,7 +1,6 @@
 package ua.in.denoming.sqlcmd.model.command;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.WrongCountOfArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import java.util.Arrays;
@@ -16,19 +15,16 @@ public class Create implements Command {
     }
 
     @Override
-    public void execute(String... args) {
-        checkArgs(args);
+    public boolean canExecute(String... args) {
+        return (args.length > 1);
+    }
 
+    @Override
+    public void execute(String... args) {
         String tableName = args[0];
         String[] columns = Arrays.copyOfRange(args, 1, args.length);
         databaseManager.createTable(tableName, columns);
 
         view.writeFormatLine("Table '%s' has created successfully", tableName);
-    }
-
-    private void checkArgs(String... args) {
-        if (args.length <= 1) {
-            throw new WrongCountOfArgumentsException();
-        }
     }
 }

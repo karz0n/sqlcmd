@@ -13,6 +13,11 @@ public class Tables implements Command {
     }
 
     @Override
+    public boolean canExecute(String... args) {
+        return true;
+    }
+
+    @Override
     public void execute(String... args) {
         String tables = databaseManager.getTables().toString();
         view.writeLine(tables);

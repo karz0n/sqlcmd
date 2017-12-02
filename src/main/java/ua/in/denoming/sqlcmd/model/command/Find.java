@@ -7,7 +7,6 @@ import org.nocrala.tools.texttablefmt.Table;
 
 import ua.in.denoming.sqlcmd.model.DataSet;
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.WrongCountOfArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import java.util.ArrayList;
@@ -48,18 +47,15 @@ public class Find implements Command {
     }
 
     @Override
-    public void execute(String... args) {
-        checkArgs(args);
+    public boolean canExecute(String... args) {
+        return (args.length == ARGUMENTS_COUNT_CONSTRAINT);
+    }
 
+    @Override
+    public void execute(String... args) {
         String tableName = args[0];
         ArrayList<DataSet> dataSets = databaseManager.obtainTableData(tableName);
 
         view.writeLine(Find.printTableData(dataSets));
-    }
-
-    private void checkArgs(String... args) {
-        if (args.length != ARGUMENTS_COUNT_CONSTRAINT) {
-            throw new WrongCountOfArgumentsException(ARGUMENTS_COUNT_CONSTRAINT, args.length);
-        }
     }
 }

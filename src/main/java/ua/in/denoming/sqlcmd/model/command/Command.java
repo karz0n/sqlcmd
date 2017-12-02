@@ -1,5 +1,6 @@
 package ua.in.denoming.sqlcmd.model.command;
 
 public interface Command {
-    void execute(String... args) throws Exception;
+    boolean canExecute(String... args);
+    void execute(String... args);
 }
