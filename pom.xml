@@ -11,6 +11,7 @@
     <properties>
         <java.version>1.8</java.version>
         <junit.jupiter.version>5.0.1</junit.jupiter.version>
+        <mockito.version>1.9.5</mockito.version>
         <postgresql.version>42.1.4</postgresql.version>
         <text-table-formatter.version>1.0</text-table-formatter.version>
     </properties>
@@ -36,6 +37,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
@@ -44,12 +51,6 @@
             <groupId>org.ow2.sirocco</groupId>
             <artifactId>sirocco-text-table-formatter</artifactId>
             <version>${text-table-formatter.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.9.5</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
