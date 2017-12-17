@@ -1,52 +1,46 @@
 package ua.in.denoming.sqlcmd.controller;
 
-import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.JdbcDatabaseManager;
-import ua.in.denoming.sqlcmd.model.PostgreSqlErrorStates;
-import ua.in.denoming.sqlcmd.model.InputHandler;
+import ua.in.denoming.sqlcmd.model.*;
 import ua.in.denoming.sqlcmd.model.command.*;
 
 import ua.in.denoming.sqlcmd.view.Console;
 import ua.in.denoming.sqlcmd.view.View;
 
 public class App implements Runnable, AutoCloseable {
-    private View view;
     private DatabaseManager databaseManager;
+    private View view;
 
     public App() {
-        this.view = new Console();
         this.databaseManager = new JdbcDatabaseManager(
             new PostgreSqlErrorStates(), "org.postgresql.Driver"
         );
+        this.view = new Console();
     }
 
     @Override
     public void run() {
-        InputHandler handler = new InputHandler(view);
+        CommandRegistry registry = new CommandRegistry();
+        registry.register("connect", new Connect(view, databaseManager));
+        registry.register("tables", new Tables(view, databaseManager));
+        registry.register("create", new Create(view, databaseManager));
+        registry.register("drop", new Drop(view, databaseManager));
+        registry.register("find", new Find(view, databaseManager));
+        registry.register("clear", new Clear(view, databaseManager));
+        registry.register("delete", new Delete(view, databaseManager));
+        registry.register("insert", new Insert(view, databaseManager));
+        registry.register("update", new Update(view, databaseManager));
+        registry.register("help", new Help(view));
 
-        String exitToken = "exit";
-        handler.setExitToken(exitToken);
+        InputHandler handler = new InputHandler(registry, view);
+        handler.setExitCommand("exit");
         handler.setExitBanner("Goodbye, see you later");
-        handler.setGreetingBanner(
-            String.format("Hello, type 'help' to get help or '%s' to quit from program", exitToken)
-        );
-
-        handler.registerCommand("connect", new Connect(view, databaseManager));
-        handler.registerCommand("tables", new Tables(view, databaseManager));
-        handler.registerCommand("create", new Create(view, databaseManager));
-        handler.registerCommand("drop", new Drop(view, databaseManager));
-        handler.registerCommand("find", new Find(view, databaseManager));
-        handler.registerCommand("clear", new Clear(view, databaseManager));
-        handler.registerCommand("delete", new Delete(view, databaseManager));
-        handler.registerCommand("insert", new Insert(view, databaseManager));
-        handler.registerCommand("update", new Update(view, databaseManager));
-        handler.registerCommand("help", new Help(view));
+        handler.setGreetingBanner("Hello, type 'help' to get help or 'exit' to quit from program");
 
         handler.handle();
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         databaseManager.close();
     }
 }
