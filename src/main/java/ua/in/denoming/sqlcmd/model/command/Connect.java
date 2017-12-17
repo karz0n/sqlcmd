@@ -1,7 +1,6 @@
 package ua.in.denoming.sqlcmd.model.command;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.WrongCountOfArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 public class Connect implements Command {
