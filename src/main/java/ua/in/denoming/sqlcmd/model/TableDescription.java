@@ -1,5 +1,7 @@
 package ua.in.denoming.sqlcmd.model;
 
+import java.util.Objects;
+
 public class TableDescription {
     private String catalog;
     private String schema;
@@ -37,6 +39,22 @@ public class TableDescription {
 
     public String getRemarks() {
         return remarks;
+    }
+
+    @Override
+    public boolean equals(Object otherObject) {
+        if (this == otherObject)
+            return true;
+        if (otherObject == null || getClass() != otherObject.getClass())
+            return false;
+
+        TableDescription other = (TableDescription) otherObject;
+        return Objects.equals(schema, other.schema) && Objects.equals(name, other.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(schema, name);
     }
 
     @Override
