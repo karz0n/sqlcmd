@@ -4,15 +4,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.command.Clear;
 import ua.in.denoming.sqlcmd.model.command.Command;
+import ua.in.denoming.sqlcmd.model.command.Create;
 import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class ClearTest {
+class CreateTest {
     private View view;
     private DatabaseManager databaseManager;
     private Command command;
@@ -21,15 +21,15 @@ class ClearTest {
     void setup() {
         view = mock(View.class);
         databaseManager = mock(DatabaseManager.class);
-        command = new Clear(view, databaseManager);
+        command = new Create(view, databaseManager);
     }
 
     @Test
     void testCanExecute() {
-        assertTrue(command.canExecute("someName"));
+        assertTrue(command.canExecute("table", "column1", "column2"));
 
         assertFalse(command.canExecute());
-        assertFalse(command.canExecute("too", "many", "arguments"));
+        assertFalse(command.canExecute("wrong"));
     }
 
     @Test
@@ -37,22 +37,21 @@ class ClearTest {
         assertThrows(WrongCommandArgumentsException.class, command::execute);
         assertThrows(
             WrongCommandArgumentsException.class,
-            () -> command.execute("too", "many", "arguments")
+            () -> command.execute("wrong")
         );
     }
 
     @Test
-    void testExecute() {
+    void testConnect() {
         //
         // When
         //
-        command.execute("someName");
+        command.execute("table", "column1", "column2");
 
         //
         // Then
         //
-        verify(databaseManager, times(1)).clearTable(anyString());
+        verify(databaseManager, times(1)).createTable(anyString(), anyVararg());
         verify(view, atLeastOnce()).writeFormatLine(anyString(), anyVararg());
     }
-
 }
