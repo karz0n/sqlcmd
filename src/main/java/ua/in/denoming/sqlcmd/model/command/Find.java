@@ -6,7 +6,7 @@ import ua.in.denoming.sqlcmd.model.TableGenerator;
 import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Find implements Command {
     private static final int ARGUMENTS_COUNT_CONSTRAINT = 1;
@@ -33,7 +33,7 @@ public class Find implements Command {
         }
 
         String tableName = args[0];
-        ArrayList<DataSet> dataSets = databaseManager.obtainTableData(tableName);
+        List<DataSet> dataSets = databaseManager.obtainTableData(tableName);
 
         view.writeLine(tableGenerator.generate(dataSets));
     }

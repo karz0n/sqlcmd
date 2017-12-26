@@ -6,9 +6,20 @@ import ua.in.denoming.sqlcmd.model.exception.NotConnectedException;
 import ua.in.denoming.sqlcmd.model.exception.WrongPasswordException;
 
 import java.io.PrintWriter;
-import java.sql.*;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  *
@@ -38,15 +49,19 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             if (isOpen()) {
                 connection.close();
             }
+
             connection = DriverManager.getConnection(url, getConnectionProperties(user, password));
         } catch (SQLException e) {
             String errorState = e.getSQLState();
+
             if (errorStates.isWrongPassword(errorState)) {
                 throw new WrongPasswordException();
             }
+
             if (errorStates.isDatabaseNotFound(errorState)) {
                 throw new DatabaseNotFoundException();
             }
+
             throw new DatabaseException("Open database connection", e);
         }
     }
@@ -74,23 +89,23 @@ public final class JdbcDatabaseManager implements DatabaseManager {
 
     /**
      * Get list of tables
-     *
      * @return list of tables
      * @throws NotConnectedException if connection wasn't established
      * @throws DatabaseException     if there is database exception
      */
     @Override
-    public ArrayList<TableDescription> getTables() {
+    public Set<TableDescription> getTables() {
         if (!isOpen()) {
             throw new NotConnectedException();
         }
+
         try {
             DatabaseMetaData metaData = connection.getMetaData();
             try (
                 ResultSet rs = metaData.getTables(
                     null, null, null, new String[]{"TABLE"})
             ) {
-                ArrayList<TableDescription> output = new ArrayList<>();
+                Set<TableDescription> tables = new HashSet<>();
                 while (rs.next()) {
                     TableDescription description = new TableDescription(
                         rs.getString(1),
@@ -99,9 +114,9 @@ public final class JdbcDatabaseManager implements DatabaseManager {
                         rs.getString(4),
                         rs.getString(5)
                     );
-                    output.add(description);
+                    tables.add(description);
                 }
-                return output;
+                return tables;
             }
         } catch (SQLException e) {
             throw new DatabaseException("Obtain database meta data", e);
@@ -124,7 +139,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         try (
             Statement statement = connection.createStatement()
         ) {
-            String creatingString = JdbcDatabaseManager.getCreatingTableString(tableName, columns);
+            String creatingString = JdbcDatabaseManager.getCreatingTableQueryString(tableName, columns);
             statement.executeUpdate(creatingString);
         } catch (SQLException e) {
             throw new DatabaseException("Create table", e);
@@ -143,10 +158,11 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         if (!isOpen()) {
             throw new NotConnectedException();
         }
+
         try (
             Statement statement = connection.createStatement()
         ) {
-            String clearingString = JdbcDatabaseManager.getClearingTableString(tableName);
+            String clearingString = JdbcDatabaseManager.getClearingTableQueryString(tableName);
             statement.executeUpdate(clearingString);
         } catch (SQLException e) {
             throw new DatabaseException("Truncate table", e);
@@ -165,10 +181,11 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         if (!isOpen()) {
             throw new NotConnectedException();
         }
+
         try (
             Statement statement = connection.createStatement()
         ) {
-            String droppingString = JdbcDatabaseManager.getDroppingTableString(tableName);
+            String droppingString = JdbcDatabaseManager.getDroppingTableQueryString(tableName);
             statement.executeUpdate(droppingString);
         } catch (SQLException e) {
             throw new DatabaseException("Drop table", e);
@@ -187,7 +204,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             throw new NotConnectedException();
         }
 
-        ArrayList<TableDescription> tables = getTables();
+        Set<TableDescription> tables = getTables();
         boolean found = false;
         for (TableDescription table : tables) {
             if (table.getName().equalsIgnoreCase(tableName)) {
@@ -206,19 +223,20 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      * @throws DatabaseException     if there is database exception
      */
     @Override
-    public ArrayList<DataSet> obtainTableData(String tableName) {
+    public List<DataSet> obtainTableData(String tableName) {
         if (!isOpen()) {
             throw new NotConnectedException();
         }
+
         try (
             Statement statement = connection.createStatement()
         ) {
-            String receivingDataString = JdbcDatabaseManager.getReceivingDataString(tableName);
+            String receivingDataString = JdbcDatabaseManager.getReceivingDataQueryString(tableName);
 
             ResultSet rs = statement.executeQuery(receivingDataString);
             ResultSetMetaData metaData = rs.getMetaData();
 
-            ArrayList<DataSet> output = new ArrayList<>();
+            List<DataSet> dataSets = new ArrayList<>();
             int columnCount = metaData.getColumnCount();
             while (rs.next()) {
                 DataSet dataSet = new DataSet(columnCount);
@@ -227,9 +245,9 @@ public final class JdbcDatabaseManager implements DatabaseManager {
                         metaData.getColumnName(i), rs.getObject(i)
                     );
                 }
-                output.add(dataSet);
+                dataSets.add(dataSet);
             }
-            return output;
+            return dataSets;
         } catch (SQLException e) {
             throw new DatabaseException("Fetch table data", e);
         }
@@ -247,10 +265,11 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         if (!isOpen()) {
             throw new NotConnectedException();
         }
+
         try (
             Statement statement = connection.createStatement()
         ) {
-            String insertingDataString = JdbcDatabaseManager.getInsertingDataString(tableName, dataSet);
+            String insertingDataString = JdbcDatabaseManager.getInsertingDataQueryString(tableName, dataSet);
             statement.executeUpdate(insertingDataString);
         } catch (SQLException e) {
             throw new DatabaseException("Insert data", e);
@@ -271,10 +290,11 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         if (!isOpen()) {
             throw new NotConnectedException();
         }
+
         try (
             Statement statement = connection.createStatement()
         ) {
-            String updatingDataString = JdbcDatabaseManager.getUpdatingDataString(tableName, column, searchValue, value);
+            String updatingDataString = JdbcDatabaseManager.getUpdatingDataQueryString(tableName, column, searchValue, value);
             statement.executeUpdate(updatingDataString);
         } catch (SQLException e) {
             throw new DatabaseException("Update data", e);
@@ -294,17 +314,18 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         if (!isOpen()) {
             throw new NotConnectedException();
         }
+
         try (
             Statement statement = connection.createStatement()
         ) {
-            String deletingDataString = JdbcDatabaseManager.getDeletingDataString(tableName, column, searchValue);
+            String deletingDataString = JdbcDatabaseManager.getDeletingDataQueryString(tableName, column, searchValue);
             statement.executeUpdate(deletingDataString);
         } catch (SQLException e) {
             throw new DatabaseException("Drop row in table", e);
         }
     }
 
-    private static String getCreatingTableString(String tableName, String... columns) {
+    private static String getCreatingTableQueryString(String tableName, String... columns) {
         StringBuilder builder = new StringBuilder("CREATE TABLE ");
         builder.append(tableName).append(" (");
         for (int i = 0; i < columns.length; ++i) {
@@ -317,19 +338,19 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         return builder.toString();
     }
 
-    private static String getClearingTableString(String tableName) {
+    private static String getClearingTableQueryString(String tableName) {
         return "TRUNCATE ".concat(tableName);
     }
 
-    private static String getDroppingTableString(String tableName) {
+    private static String getDroppingTableQueryString(String tableName) {
         return "DROP TABLE ".concat(tableName);
     }
 
-    private static String getReceivingDataString(String tableName) {
+    private static String getReceivingDataQueryString(String tableName) {
         return "SELECT * FROM ".concat(tableName);
     }
 
-    private static String getInsertingDataString(String tableName, DataSet dataSet) {
+    private static String getInsertingDataQueryString(String tableName, DataSet dataSet) {
         StringBuilder builder = new StringBuilder("INSERT INTO ");
 
         builder.append(tableName).append('(');
@@ -355,13 +376,13 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         return builder.toString();
     }
 
-    private static String getUpdatingDataString(String tableName, String column, String searchValue, String value) {
+    private static String getUpdatingDataQueryString(String tableName, String column, String searchValue, String value) {
         return String.format(
             "UPDATE %s SET %s='%s' WHERE %s='%s'", tableName, column, value, column, searchValue
         );
     }
 
-    private static String getDeletingDataString(String tableName, String column, String searchValue) {
+    private static String getDeletingDataQueryString(String tableName, String column, String searchValue) {
         return String.format(
             "DELETE FROM %s WHERE %s='%s'", tableName, column, searchValue
         );

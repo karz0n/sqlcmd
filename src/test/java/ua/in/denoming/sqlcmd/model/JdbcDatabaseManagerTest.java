@@ -9,11 +9,9 @@ import org.junit.jupiter.api.TestInstance;
 
 import ua.in.denoming.sqlcmd.TestProperties;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JdbcDatabaseManagerTest {
@@ -84,7 +82,7 @@ class JdbcDatabaseManagerTest {
             @Test
             @DisplayName("data have inserted")
             void isDataExists() {
-                ArrayList<DataSet> dataSets = databaseManager.obtainTableData(TABLE_NAME);
+                List<DataSet> dataSets = databaseManager.obtainTableData(TABLE_NAME);
                 assertEquals(1, dataSets.size());
                 assertEquals(dataSets.get(0), TABLE_DATA);
             }
@@ -103,7 +101,7 @@ class JdbcDatabaseManagerTest {
                     value
                 );
 
-                ArrayList<DataSet> dataSets = databaseManager.obtainTableData(TABLE_NAME);
+                List<DataSet> dataSets = databaseManager.obtainTableData(TABLE_NAME);
                 assertEquals(1, dataSets.size());
 
                 DataSet dataSet = new DataSet(
@@ -121,7 +119,7 @@ class JdbcDatabaseManagerTest {
 
                 databaseManager.deleteData(TABLE_NAME, column, searchValue);
 
-                ArrayList<DataSet> dataSets = databaseManager.obtainTableData(TABLE_NAME);
+                List<DataSet> dataSets = databaseManager.obtainTableData(TABLE_NAME);
                 assertEquals(0, dataSets.size());
             }
         }

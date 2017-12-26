@@ -1,6 +1,7 @@
 package ua.in.denoming.sqlcmd.model;
 
-import java.util.ArrayList;
+import java.util.Set;
+import java.util.List;
 
 public interface DatabaseManager {
     void open(String url, String user, String password);
@@ -9,7 +10,7 @@ public interface DatabaseManager {
 
     boolean isOpen();
 
-    ArrayList<TableDescription> getTables();
+    Set<TableDescription> getTables();
 
     void createTable(String tableName, String... columns);
 
@@ -19,7 +20,7 @@ public interface DatabaseManager {
 
     boolean isTableExists(String tableName);
 
-    ArrayList<DataSet> obtainTableData(String tableName);
+    List<DataSet> obtainTableData(String tableName);
 
     void insertData(String tableName, DataSet dataSet);
 

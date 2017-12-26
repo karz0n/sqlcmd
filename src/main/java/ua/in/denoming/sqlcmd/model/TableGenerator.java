@@ -13,7 +13,7 @@ public class TableGenerator {
     private static final String TABLE_V_SPLIT_SYMBOL = "|";
     private static final String TABLE_H_SPLIT_SYMBOL = "-";
 
-    public String generate(ArrayList<DataSet> dataSets) {
+    public String generate(List<DataSet> dataSets) {
         if (dataSets.size() == 0) {
             return "";
         }
@@ -47,7 +47,7 @@ public class TableGenerator {
         return stringBuilder.toString();
     }
 
-    private List<String> generateHeaders(ArrayList<DataSet> dataSets) {
+    private List<String> generateHeaders(List<DataSet> dataSets) {
         if (dataSets.size() == 0) {
             return new LinkedList<>();
         }
@@ -57,7 +57,7 @@ public class TableGenerator {
         );
     }
 
-    private List<List<String>> generateRows(ArrayList<DataSet> dataSets) {
+    private List<List<String>> generateRows(List<DataSet> dataSets) {
         if (dataSets.size() == 0) {
             return new LinkedList<>();
         }
