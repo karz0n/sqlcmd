@@ -1,6 +1,7 @@
 package ua.in.denoming.sqlcmd.model.command;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
+import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 public class Connect implements Command {
@@ -21,10 +22,14 @@ public class Connect implements Command {
 
     @Override
     public void execute(String... args) {
+        if (!canExecute(args)) {
+            throw new WrongCommandArgumentsException();
+        }
+
         String url = args[0];
-        String user = args[1];
+        String userName = args[1];
         String password = args[2];
-        databaseManager.open(url, user, password);
+        databaseManager.open(url, userName, password);
 
         view.writeLine("Database has opened successfully");
     }

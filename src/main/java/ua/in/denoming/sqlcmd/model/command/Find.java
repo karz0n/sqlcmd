@@ -34,6 +34,7 @@ public class Find implements Command {
 
         String tableName = args[0];
         ArrayList<DataSet> dataSets = databaseManager.obtainTableData(tableName);
+
         view.writeLine(tableGenerator.generate(dataSets));
     }
 }

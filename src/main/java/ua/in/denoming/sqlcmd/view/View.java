@@ -14,7 +14,6 @@ public interface View {
     @SuppressWarnings("UnusedReturnValue")
     View writeFormat(String format, Object... objects);
 
-    @SuppressWarnings("UnusedReturnValue")
     default View writeFormatLine(String format, Object... objects) {
         writeFormat(format, objects);
         return line();

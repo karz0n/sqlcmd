@@ -2,7 +2,10 @@ package ua.in.denoming.sqlcmd.model.command;
 
 import ua.in.denoming.sqlcmd.model.DataSet;
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
+import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
+
+import java.util.Arrays;
 
 public class Insert implements Command {
     private View view;
@@ -21,13 +24,24 @@ public class Insert implements Command {
 
     @Override
     public void execute(String... args) {
-        String tableName = args[0];
-        DataSet dataSet = new DataSet((args.length - 1) / 2);
-        for (int i = 1; i < args.length; i += 2) {
-            dataSet.put(args[i], args[i + 1]);
+        if (!canExecute(args)) {
+            throw new WrongCommandArgumentsException();
         }
+
+        String tableName = args[0];
+        Object[] values = Arrays.copyOfRange(args, 1, args.length);
+        DataSet dataSet = createDataSet(values);
         databaseManager.insertData(tableName, dataSet);
 
         view.writeFormatLine("Values to '%s' table has inserted successfully", tableName);
+    }
+
+    private DataSet createDataSet(Object... values) {
+        DataSet dataSet = new DataSet((values.length - 1) / 2);
+        for (int i = 0; i < values.length; i += 2) {
+            String name = (String) values[i];
+            dataSet.put(name, values[i + 1]);
+        }
+        return dataSet;
     }
 }

@@ -1,6 +1,7 @@
 package ua.in.denoming.sqlcmd.model.command;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
+import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import java.util.Arrays;
@@ -21,6 +22,10 @@ public class Create implements Command {
 
     @Override
     public void execute(String... args) {
+        if (!canExecute(args)) {
+            throw new WrongCommandArgumentsException();
+        }
+
         String tableName = args[0];
         String[] columns = Arrays.copyOfRange(args, 1, args.length);
         databaseManager.createTable(tableName, columns);
