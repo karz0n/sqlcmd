@@ -1,18 +1,16 @@
-package ua.in.denoming.sqlcmd.controller;
+package ua.in.denoming.sqlcmd.model.command;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.command.Command;
-import ua.in.denoming.sqlcmd.model.command.Create;
 import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class CreateTest {
+class FindTest {
     private View view;
     private DatabaseManager databaseManager;
     private Command command;
@@ -21,37 +19,37 @@ class CreateTest {
     void setup() {
         view = mock(View.class);
         databaseManager = mock(DatabaseManager.class);
-        command = new Create(view, databaseManager);
+        command = new Find(view, databaseManager);
     }
 
     @Test
     void testCanExecute() {
-        assertTrue(command.canExecute("table", "column1", "column2"));
-
+        assertTrue(command.canExecute("tableName"));
         assertFalse(command.canExecute());
-        assertFalse(command.canExecute("wrong"));
+        assertFalse(
+            command.canExecute("too", "many", "arguments")
+        );
     }
 
     @Test
     void testWrongCallOfExecute() {
         assertThrows(WrongCommandArgumentsException.class, command::execute);
         assertThrows(
-            WrongCommandArgumentsException.class,
-            () -> command.execute("wrong")
+            WrongCommandArgumentsException.class, () -> command.execute("too", "many", "arguments")
         );
     }
 
     @Test
-    void testConnect() {
+    void testExecute() {
         //
         // When
         //
-        command.execute("table", "column1", "column2");
+        command.execute("tableName");
 
         //
         // Then
         //
-        verify(databaseManager, times(1)).createTable(anyString(), anyVararg());
-        verify(view, atLeastOnce()).writeFormatLine(anyString(), anyVararg());
+        verify(databaseManager, times(1)).obtainTableData(anyString());
+        verify(view, atLeastOnce()).writeLine(anyString());
     }
 }

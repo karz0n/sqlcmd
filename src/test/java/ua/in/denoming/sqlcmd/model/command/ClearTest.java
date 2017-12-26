@@ -1,11 +1,9 @@
-package ua.in.denoming.sqlcmd.controller;
+package ua.in.denoming.sqlcmd.model.command;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.command.Clear;
-import ua.in.denoming.sqlcmd.model.command.Command;
 import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 

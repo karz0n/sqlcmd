@@ -1,19 +1,16 @@
-package ua.in.denoming.sqlcmd.controller;
+package ua.in.denoming.sqlcmd.model.command;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.command.Command;
-import ua.in.denoming.sqlcmd.model.command.Delete;
 import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-class DeleteTest {
+class CreateTest {
     private View view;
     private DatabaseManager databaseManager;
     private Command command;
@@ -22,15 +19,15 @@ class DeleteTest {
     void setup() {
         view = mock(View.class);
         databaseManager = mock(DatabaseManager.class);
-        command = new Delete(view, databaseManager);
+        command = new Create(view, databaseManager);
     }
 
     @Test
     void testCanExecute() {
-        assertTrue(command.canExecute("tableName", "column", "searchValue"));
+        assertTrue(command.canExecute("table", "column1", "column2"));
 
         assertFalse(command.canExecute());
-        assertFalse(command.canExecute("too", "many", "arguments", "and", "more"));
+        assertFalse(command.canExecute("wrong"));
     }
 
     @Test
@@ -38,7 +35,7 @@ class DeleteTest {
         assertThrows(WrongCommandArgumentsException.class, command::execute);
         assertThrows(
             WrongCommandArgumentsException.class,
-            () -> command.execute("too", "many", "arguments", "and", "more")
+            () -> command.execute("wrong")
         );
     }
 
@@ -47,12 +44,12 @@ class DeleteTest {
         //
         // When
         //
-        command.execute("tableName", "column", "searchValue");
+        command.execute("table", "column1", "column2");
 
         //
         // Then
         //
-        verify(databaseManager, times(1)).deleteData(anyString(), anyString(), anyString());
+        verify(databaseManager, times(1)).createTable(anyString(), anyVararg());
         verify(view, atLeastOnce()).writeFormatLine(anyString(), anyVararg());
     }
 }

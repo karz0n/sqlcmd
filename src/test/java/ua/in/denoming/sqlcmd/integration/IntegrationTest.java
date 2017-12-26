@@ -135,11 +135,11 @@ class IntegrationTest {
             "Database has opened successfully" + System.lineSeparator() +
             "Table '" + TABLE_NAME + "' has created successfully" + System.lineSeparator() +
             "Values to '" + TABLE_NAME + "' table has inserted successfully" + System.lineSeparator() +
-            "+-------+-------+\n" +
-            "|column1|column2|\n" +
-            "+-------+-------+\n" +
-            "|value1 |value2 |\n" +
-            "+-------+-------+" + System.lineSeparator() +
+            "+------------+------------+" + System.lineSeparator() +
+            "|  column1   |  column2   |" + System.lineSeparator() +
+            "+------------+------------+" + System.lineSeparator() +
+            "|   value1   |   value2   |" + System.lineSeparator() +
+            "+------------+------------+" + System.lineSeparator() +
             "Table '" + TABLE_NAME + "' has dropped successfully" + System.lineSeparator() +
             "Goodbye, see you later" + System.lineSeparator();
         assertEquals(expected, out.readLine());
@@ -162,11 +162,11 @@ class IntegrationTest {
             "Table '" + TABLE_NAME + "' has created successfully" + System.lineSeparator() +
             "Values to '" + TABLE_NAME + "' table has inserted successfully" + System.lineSeparator() +
             "Table '" + TABLE_NAME + "' has updated successfully" + System.lineSeparator() +
-            "+-------+-------+\n" +
-            "|column1|column2|\n" +
-            "+-------+-------+\n" +
-            "|value3 |value2 |\n" +
-            "+-------+-------+" + System.lineSeparator() +
+            "+------------+------------+" + System.lineSeparator() +
+            "|  column1   |  column2   |" + System.lineSeparator() +
+            "+------------+------------+" + System.lineSeparator() +
+            "|   value3   |   value2   |" + System.lineSeparator() +
+            "+------------+------------+" + System.lineSeparator() +
             "Table '" + TABLE_NAME + "' has dropped successfully" + System.lineSeparator() +
             "Goodbye, see you later" + System.lineSeparator();
         assertEquals(expected, out.readLine());
