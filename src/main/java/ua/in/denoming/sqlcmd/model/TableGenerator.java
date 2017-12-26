@@ -1,10 +1,9 @@
 package ua.in.denoming.sqlcmd.model;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 public class TableGenerator {
@@ -13,14 +12,14 @@ public class TableGenerator {
     private static final String TABLE_V_SPLIT_SYMBOL = "|";
     private static final String TABLE_H_SPLIT_SYMBOL = "-";
 
-    public String generate(List<DataSet> dataSets) {
-        if (dataSets.size() == 0) {
+    public String generate(List<DataSet> data) {
+        if (data.size() == 0) {
             return "";
         }
 
         StringBuilder stringBuilder = new StringBuilder();
-        List<String> headers = generateHeaders(dataSets);
-        List<List<String>> rows = generateRows(dataSets);
+        List<String> headers = generateHeaders(data);
+        List<List<String>> rows = generateRows(data);
 
         Map<Integer, Integer> columnMaxWidthMapping = getMaximumWidthOfTable(headers, rows);
 

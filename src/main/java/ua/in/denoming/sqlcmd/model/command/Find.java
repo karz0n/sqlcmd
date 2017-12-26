@@ -33,8 +33,8 @@ public class Find implements Command {
         }
 
         String tableName = args[0];
-        List<DataSet> dataSets = databaseManager.obtainTableData(tableName);
+        List<DataSet> tableData = databaseManager.obtainTableData(tableName);
 
-        view.writeLine(tableGenerator.generate(dataSets));
+        view.writeLine(tableGenerator.generate(tableData));
     }
 }

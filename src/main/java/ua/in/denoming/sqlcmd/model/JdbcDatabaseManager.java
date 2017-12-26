@@ -16,8 +16,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
@@ -89,7 +90,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
 
     /**
      * Get list of tables
-     * @return list of tables
+     * @return read only set of tables description
      * @throws NotConnectedException if connection wasn't established
      * @throws DatabaseException     if there is database exception
      */
@@ -116,7 +117,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
                     );
                     tables.add(description);
                 }
-                return tables;
+                return Collections.unmodifiableSet(tables);
             }
         } catch (SQLException e) {
             throw new DatabaseException("Obtain database meta data", e);
@@ -218,7 +219,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
     /**
      * Obtain list of table data sets
      * @param tableName name of table
-     * @return set of data
+     * @return read only collection of data
      * @throws NotConnectedException if connection wasn't established
      * @throws DatabaseException     if there is database exception
      */
@@ -236,7 +237,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             ResultSet rs = statement.executeQuery(receivingDataString);
             ResultSetMetaData metaData = rs.getMetaData();
 
-            List<DataSet> dataSets = new ArrayList<>();
+            List<DataSet> tableData = new ArrayList<>();
             int columnCount = metaData.getColumnCount();
             while (rs.next()) {
                 DataSet dataSet = new DataSet(columnCount);
@@ -245,9 +246,9 @@ public final class JdbcDatabaseManager implements DatabaseManager {
                         metaData.getColumnName(i), rs.getObject(i)
                     );
                 }
-                dataSets.add(dataSet);
+                tableData.add(dataSet);
             }
-            return dataSets;
+            return Collections.unmodifiableList(tableData);
         } catch (SQLException e) {
             throw new DatabaseException("Fetch table data", e);
         }
