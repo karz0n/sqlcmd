@@ -20,6 +20,7 @@ public class Tables implements Command {
     @Override
     public void execute(String... args) {
         String tables = databaseManager.getTables().toString();
+
         view.writeLine(tables);
     }
 }
