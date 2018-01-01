@@ -1,7 +1,21 @@
 package ua.in.denoming.sqlcmd.controller;
 
-import ua.in.denoming.sqlcmd.model.*;
-import ua.in.denoming.sqlcmd.model.command.*;
+import ua.in.denoming.sqlcmd.model.CommandRegistry;
+import ua.in.denoming.sqlcmd.model.DatabaseManager;
+import ua.in.denoming.sqlcmd.model.InputHandler;
+import ua.in.denoming.sqlcmd.model.JdbcDatabaseManager;
+import ua.in.denoming.sqlcmd.model.PostgreSqlErrorStates;
+
+import ua.in.denoming.sqlcmd.model.command.Clear;
+import ua.in.denoming.sqlcmd.model.command.Connect;
+import ua.in.denoming.sqlcmd.model.command.Create;
+import ua.in.denoming.sqlcmd.model.command.Delete;
+import ua.in.denoming.sqlcmd.model.command.Drop;
+import ua.in.denoming.sqlcmd.model.command.Find;
+import ua.in.denoming.sqlcmd.model.command.Help;
+import ua.in.denoming.sqlcmd.model.command.Insert;
+import ua.in.denoming.sqlcmd.model.command.Tables;
+import ua.in.denoming.sqlcmd.model.command.Update;
 
 import ua.in.denoming.sqlcmd.view.Console;
 import ua.in.denoming.sqlcmd.view.View;
@@ -10,13 +24,32 @@ public class App implements Runnable, AutoCloseable {
     private DatabaseManager databaseManager;
     private View view;
 
+    /**
+     * Main method
+     * @param args arguments of program
+     */
+    public static void main(String[] args) {
+        JdbcDatabaseManager.registerDrivers("org.postgresql.Driver");
+
+        try (App app = new App()) {
+            app.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Construct application controller
+     */
+    @SuppressWarnings("WeakerAccess")
     public App() {
-        this.databaseManager = new JdbcDatabaseManager(
-            new PostgreSqlErrorStates(), "org.postgresql.Driver"
-        );
+        this.databaseManager = new JdbcDatabaseManager(new PostgreSqlErrorStates());
         this.view = new Console();
     }
 
+    /**
+     * Run application controller
+     */
     @Override
     public void run() {
         CommandRegistry registry = new CommandRegistry();
@@ -39,6 +72,9 @@ public class App implements Runnable, AutoCloseable {
         handler.handle();
     }
 
+    /**
+     * Close application controller
+     */
     @Override
     public void close() {
         databaseManager.close();

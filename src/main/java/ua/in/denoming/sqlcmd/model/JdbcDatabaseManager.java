@@ -1,11 +1,6 @@
 package ua.in.denoming.sqlcmd.model;
 
-import ua.in.denoming.sqlcmd.model.exception.DatabaseException;
-import ua.in.denoming.sqlcmd.model.exception.DatabaseNotFoundException;
-import ua.in.denoming.sqlcmd.model.exception.NotConnectedException;
-import ua.in.denoming.sqlcmd.model.exception.WrongPasswordException;
-
-import java.io.PrintWriter;
+import ua.in.denoming.sqlcmd.model.exception.*;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -16,39 +11,63 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
 /**
- *
+ * JDBC database manager implementation
  */
 public final class JdbcDatabaseManager implements DatabaseManager {
     private ErrorStates errorStates;
     private Connection connection;
 
-    @SuppressWarnings("unused")
+    /**
+     * Register drivers
+     * @param drivers list of drivers separated by semicolon
+     */
+    public static void registerDrivers(String drivers) {
+        Objects.requireNonNull(drivers);
+
+        try {
+            String[] items = drivers.split(";");
+            for (String item : items) {
+                Class.forName(item);
+            }
+        } catch (ClassNotFoundException e) {
+            throw new DatabaseException("Register drivers");
+        }
+    }
+
+    /**
+     * Construct class
+     * @param errorStates error stats
+     */
     public JdbcDatabaseManager(ErrorStates errorStates) {
-        this(errorStates, null, null);
-    }
-
-    public JdbcDatabaseManager(ErrorStates errorStates, String drivers) {
-        this(errorStates, drivers, null);
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public JdbcDatabaseManager(ErrorStates errorStates, String drivers, PrintWriter writer) {
         this.errorStates = errorStates;
-        configure(drivers, writer);
     }
 
+    /**
+     * Open database connection
+     *
+     * @param url database url
+     * @param user database user name
+     * @param password database user password
+     * @throws DatabaseException when open database connection error occurs
+     */
     @Override
     public void open(String url, String user, String password) throws DatabaseException {
+        Objects.requireNonNull(url);
+        Objects.requireNonNull(user);
+        Objects.requireNonNull(password);
+
         try {
             if (isOpen()) {
-                connection.close();
+                close();
             }
 
             connection = DriverManager.getConnection(url, getConnectionProperties(user, password));
@@ -63,14 +82,19 @@ public final class JdbcDatabaseManager implements DatabaseManager {
                 throw new DatabaseNotFoundException();
             }
 
-            throw new DatabaseException("Open database connection", e);
+            throw new DatabaseException(String.format("Open database connection by '%s' url", url), e);
         }
     }
 
+    /**
+     * Close database connection
+     *
+     * @throws DatabaseException when close database connection error occurs
+     */
     @Override
     public void close() throws DatabaseException {
         try {
-            if (connection != null && !connection.isClosed()) {
+            if (connection != null) {
                 connection.close();
                 connection = null;
             }
@@ -79,6 +103,11 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         }
     }
 
+    /**
+     * Check is database connection established
+     *
+     * @return a connection to database status
+     */
     @Override
     public boolean isOpen() {
         try {
@@ -90,7 +119,8 @@ public final class JdbcDatabaseManager implements DatabaseManager {
 
     /**
      * Get list of tables
-     * @return read only set of tables description
+     *
+     * @return read only set of table description objects
      * @throws NotConnectedException if connection wasn't established
      * @throws DatabaseException     if there is database exception
      */
@@ -120,7 +150,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
                 return Collections.unmodifiableSet(tables);
             }
         } catch (SQLException e) {
-            throw new DatabaseException("Obtain database meta data", e);
+            throw new DatabaseException("Get list of tables", e);
         }
     }
 
@@ -134,16 +164,22 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public void createTable(String tableName, String... columns) {
+        Objects.requireNonNull(tableName);
+        if (columns.length == 0) {
+            throw new WrongArgumentsException("Incorrect column count");
+        }
+
         if (!isOpen()) {
             throw new NotConnectedException();
         }
+
         try (
             Statement statement = connection.createStatement()
         ) {
             String creatingString = JdbcDatabaseManager.getCreatingTableQueryString(tableName, columns);
             statement.executeUpdate(creatingString);
         } catch (SQLException e) {
-            throw new DatabaseException("Create table", e);
+            throw new DatabaseException(String.format("Create '%s' table", tableName), e);
         }
     }
 
@@ -156,6 +192,8 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public void clearTable(String tableName) {
+        Objects.requireNonNull(tableName);
+
         if (!isOpen()) {
             throw new NotConnectedException();
         }
@@ -166,7 +204,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             String clearingString = JdbcDatabaseManager.getClearingTableQueryString(tableName);
             statement.executeUpdate(clearingString);
         } catch (SQLException e) {
-            throw new DatabaseException("Truncate table", e);
+            throw new DatabaseException(String.format("Clear '%s' table", tableName), e);
         }
     }
 
@@ -179,6 +217,8 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public void deleteTable(String tableName) {
+        Objects.requireNonNull(tableName);
+
         if (!isOpen()) {
             throw new NotConnectedException();
         }
@@ -189,18 +229,21 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             String droppingString = JdbcDatabaseManager.getDroppingTableQueryString(tableName);
             statement.executeUpdate(droppingString);
         } catch (SQLException e) {
-            throw new DatabaseException("Drop table", e);
+            throw new DatabaseException(String.format("Delete '%s' table", tableName), e);
         }
     }
 
     /**
      * Check table exists
+     *
      * @param tableName name of table
      * @return result of table existence checking
      * @throws NotConnectedException if connection wasn't established
      */
     @Override
     public boolean isTableExists(String tableName) {
+        Objects.requireNonNull(tableName);
+
         if (!isOpen()) {
             throw new NotConnectedException();
         }
@@ -217,14 +260,17 @@ public final class JdbcDatabaseManager implements DatabaseManager {
     }
 
     /**
-     * Obtain list of table data sets
+     * Get data of specific table
+     *
      * @param tableName name of table
      * @return read only collection of data
      * @throws NotConnectedException if connection wasn't established
      * @throws DatabaseException     if there is database exception
      */
     @Override
-    public List<DataSet> obtainTableData(String tableName) {
+    public List<DataSet> getData(String tableName) {
+        Objects.requireNonNull(tableName);
+
         if (!isOpen()) {
             throw new NotConnectedException();
         }
@@ -242,27 +288,29 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             while (rs.next()) {
                 DataSet dataSet = new DataSet(columnCount);
                 for (int i = 1; i <= columnCount; i++) {
-                    dataSet.put(
-                        metaData.getColumnName(i), rs.getObject(i)
-                    );
+                    dataSet.set(metaData.getColumnName(i), rs.getObject(i));
                 }
                 tableData.add(dataSet);
             }
             return Collections.unmodifiableList(tableData);
         } catch (SQLException e) {
-            throw new DatabaseException("Fetch table data", e);
+            throw new DatabaseException(String.format("Get data of '%s' table", tableName), e);
         }
     }
 
     /**
-     * Insert data set to table
+     * Insert data to table
+     *
      * @param tableName name of table
      * @param dataSet set of data
      * @throws NotConnectedException if connection wasn't established
-     * @throws DatabaseException     if there is database exception
+     * @throws DatabaseException if there is database exception
      */
     @Override
     public void insertData(String tableName, DataSet dataSet) {
+        Objects.requireNonNull(tableName);
+        Objects.requireNonNull(dataSet);
+
         if (!isOpen()) {
             throw new NotConnectedException();
         }
@@ -273,21 +321,27 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             String insertingDataString = JdbcDatabaseManager.getInsertingDataQueryString(tableName, dataSet);
             statement.executeUpdate(insertingDataString);
         } catch (SQLException e) {
-            throw new DatabaseException("Insert data", e);
+            throw new DatabaseException(String.format("Insert data to '%s' table", tableName), e);
         }
     }
 
     /**
-     * Update table
+     * Update data of table
+     *
      * @param tableName name of table
      * @param column specific column name
      * @param searchValue value to search in specific column
      * @param value new value
      * @throws NotConnectedException if connection wasn't established
-     * @throws DatabaseException     if there is database exception
+     * @throws DatabaseException if there is database exception
      */
     @Override
     public void updateData(String tableName, String column, String searchValue, String value) {
+        Objects.requireNonNull(tableName);
+        Objects.requireNonNull(column);
+        Objects.requireNonNull(searchValue);
+        Objects.requireNonNull(value);
+
         if (!isOpen()) {
             throw new NotConnectedException();
         }
@@ -298,20 +352,25 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             String updatingDataString = JdbcDatabaseManager.getUpdatingDataQueryString(tableName, column, searchValue, value);
             statement.executeUpdate(updatingDataString);
         } catch (SQLException e) {
-            throw new DatabaseException("Update data", e);
+            throw new DatabaseException(String.format("Update data of '%s' table", tableName), e);
         }
     }
 
     /**
-     * Delete data in table
+     * Delete data in specific table
+     *
      * @param tableName name of table
      * @param column specific column name
      * @param searchValue value to search in specific column
      * @throws NotConnectedException if connection wasn't established
-     * @throws DatabaseException     if there is database exception
+     * @throws DatabaseException if there is database exception
      */
     @Override
     public void deleteData(String tableName, String column, String searchValue) {
+        Objects.requireNonNull(tableName);
+        Objects.requireNonNull(column);
+        Objects.requireNonNull(searchValue);
+
         if (!isOpen()) {
             throw new NotConnectedException();
         }
@@ -322,7 +381,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             String deletingDataString = JdbcDatabaseManager.getDeletingDataQueryString(tableName, column, searchValue);
             statement.executeUpdate(deletingDataString);
         } catch (SQLException e) {
-            throw new DatabaseException("Drop row in table", e);
+            throw new DatabaseException(String.format("Delete data in '%s' table", tableName), e);
         }
     }
 
@@ -335,8 +394,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
             }
             builder.append(columns[i]).append(" TEXT");
         }
-        builder.append(")");
-        return builder.toString();
+        return builder.append(")").toString();
     }
 
     private static String getClearingTableQueryString(String tableName) {
@@ -352,25 +410,28 @@ public final class JdbcDatabaseManager implements DatabaseManager {
     }
 
     private static String getInsertingDataQueryString(String tableName, DataSet dataSet) {
-        StringBuilder builder = new StringBuilder("INSERT INTO ");
+        StringBuilder builder = new StringBuilder();
 
-        builder.append(tableName).append('(');
-        String[] names = dataSet.getNames();
-        for (int i = 0; i < names.length; i++) {
-            if (i > 0) {
+        int counter = 0;
+        builder.append("INSERT INTO ").append(tableName).append('(');
+        Set<String> names = dataSet.names();
+        for (String name : names) {
+            if (counter > 0) {
                 builder.append(", ");
             }
-            builder.append(names[i]);
+            builder.append(name);
+            counter++;
         }
 
+        counter = 0;
         builder.append(") VALUES (");
-
-        Object[] objects = dataSet.getValues();
-        for (int i = 0; i < objects.length; i++) {
-            if (i > 0) {
+        Collection<Object> values = dataSet.values();
+        for (Object value : values) {
+            if (counter > 0) {
                 builder.append(", ");
             }
-            builder.append('\'').append(objects[i]).append('\'');
+            builder.append('\'').append(value).append('\'');
+            counter++;
         }
         builder.append(')');
 
@@ -378,22 +439,11 @@ public final class JdbcDatabaseManager implements DatabaseManager {
     }
 
     private static String getUpdatingDataQueryString(String tableName, String column, String searchValue, String value) {
-        return String.format(
-            "UPDATE %s SET %s='%s' WHERE %s='%s'", tableName, column, value, column, searchValue
-        );
+        return String.format("UPDATE %s SET %s='%s' WHERE %s='%s'", tableName, column, value, column, searchValue);
     }
 
     private static String getDeletingDataQueryString(String tableName, String column, String searchValue) {
-        return String.format(
-            "DELETE FROM %s WHERE %s='%s'", tableName, column, searchValue
-        );
-    }
-
-    private void configure(String drivers, PrintWriter writer) {
-        if (drivers != null) {
-            System.setProperty("jdbc.drivers", drivers);
-        }
-        DriverManager.setLogWriter(writer);
+        return String.format("DELETE FROM %s WHERE %s='%s'", tableName, column, searchValue);
     }
 
     private Properties getConnectionProperties(String username, String password) {

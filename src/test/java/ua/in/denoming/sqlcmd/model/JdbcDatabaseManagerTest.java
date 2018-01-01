@@ -9,7 +9,9 @@ import org.junit.jupiter.api.TestInstance;
 
 import ua.in.denoming.sqlcmd.TestProperties;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,9 +23,9 @@ class JdbcDatabaseManagerTest {
 
     @BeforeAll
     void setup() {
-        databaseManager = new JdbcDatabaseManager(
-            new PostgreSqlErrorStates(), "org.postgresql.Driver"
-        );
+        JdbcDatabaseManager.registerDrivers("org.postgresql.Driver");
+
+        databaseManager = new JdbcDatabaseManager(new PostgreSqlErrorStates());
         databaseManager.open(
             JdbcDatabaseManagerTest.testProperties.getDatabaseUrl(),
             JdbcDatabaseManagerTest.testProperties.getDatabaseUserName(),
@@ -47,14 +49,10 @@ class JdbcDatabaseManagerTest {
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class AfterTableCreating {
         private final String TABLE_NAME = "TEST_TABLE";
-        private final DataSet TABLE_DATA = new DataSet(
-            new DataSet.Data("column1", "value1"),
-            new DataSet.Data("column2", "value2")
-        );
 
         @BeforeAll
         void createTable() {
-            databaseManager.createTable(TABLE_NAME, "column1", "column2");
+            databaseManager.createTable(TABLE_NAME, "column1", "column2", "column3");
             assertTrue(databaseManager.isTableExists(TABLE_NAME));
         }
 
@@ -74,24 +72,34 @@ class JdbcDatabaseManagerTest {
         @DisplayName("after inserting data")
         @TestInstance(TestInstance.Lifecycle.PER_CLASS)
         class AfterDataInserting {
+            private DataSet tableData;
+
             @BeforeAll
             void insertData() {
-                databaseManager.insertData(TABLE_NAME, TABLE_DATA);
+                tableData = new DataSet();
+                tableData.set("column1", "value1");
+                tableData.set("column2", "value2");
+                tableData.set("column3", "value3");
+
+                databaseManager.insertData(TABLE_NAME, tableData);
             }
 
             @Test
             @DisplayName("data have inserted")
             void isDataExists() {
-                List<DataSet> dataSets = databaseManager.obtainTableData(TABLE_NAME);
+                List<DataSet> dataSets = databaseManager.getData(TABLE_NAME);
                 assertEquals(1, dataSets.size());
-                assertEquals(dataSets.get(0), TABLE_DATA);
+                assertEquals(dataSets.get(0), tableData);
             }
 
             @Test
             @DisplayName("data have updated")
             void testUpdateData() {
-                String column = TABLE_DATA.get(0).getName();
-                String searchValue = TABLE_DATA.getString(0);
+                Iterator<Map.Entry<String, Object>> iterator = tableData.iterator();
+
+                Map.Entry<String, Object> firstEntry = iterator.next();
+                String column = firstEntry.getKey();
+                String searchValue = firstEntry.getValue().toString();
                 String value = "value";
 
                 databaseManager.updateData(
@@ -101,28 +109,32 @@ class JdbcDatabaseManagerTest {
                     value
                 );
 
-                List<DataSet> dataSets = databaseManager.obtainTableData(TABLE_NAME);
-                assertEquals(1, dataSets.size());
+                List<DataSet> tableData = databaseManager.getData(TABLE_NAME);
+                assertEquals(1, tableData.size());
 
-                DataSet dataSet = new DataSet(
-                    new DataSet.Data(column, value),
-                    new DataSet.Data(TABLE_DATA.get(1).getName(), TABLE_DATA.get(1).getValue())
-                );
-                assertEquals(dataSets.get(0), dataSet);
+                DataSet dataSet = new DataSet();
+                dataSet.set(column, value);
+                while (iterator.hasNext()) {
+                    Map.Entry<String, Object> entry = iterator.next();
+                    dataSet.set(entry.getKey(), entry.getValue());
+                }
+
+                assertEquals(tableData.get(0), dataSet);
             }
 
             @Test
             @DisplayName("data have deleted")
             void testDeleteData() {
-                String column = TABLE_DATA.get(1).getName();
-                String searchValue = TABLE_DATA.getString(1);
+                Map.Entry<String, Object> firstEntry = tableData.iterator().next();
+
+                String column = firstEntry.getKey();
+                String searchValue = firstEntry.getValue().toString();
 
                 databaseManager.deleteData(TABLE_NAME, column, searchValue);
 
-                List<DataSet> dataSets = databaseManager.obtainTableData(TABLE_NAME);
-                assertEquals(0, dataSets.size());
+                List<DataSet> dataSets = databaseManager.getData(TABLE_NAME);
+                assertEquals(1, dataSets.size());
             }
         }
-
     }
 }

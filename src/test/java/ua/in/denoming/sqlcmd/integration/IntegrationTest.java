@@ -3,8 +3,8 @@ package ua.in.denoming.sqlcmd.integration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ua.in.denoming.sqlcmd.Main;
 import ua.in.denoming.sqlcmd.TestProperties;
+import ua.in.denoming.sqlcmd.controller.App;
 
 import java.io.PrintStream;
 
@@ -35,7 +35,7 @@ class IntegrationTest {
         in.writeLine("help");
         in.writeLine("exit");
 
-        Main.main(new String[0]);
+        App.main(new String[0]);
 
         String expected = "Hello, type 'help' to get help or 'exit' to quit from program" + System.lineSeparator() +
             "Usage: <command> [<param1> <param2> ...]" + System.lineSeparator() +
@@ -70,7 +70,7 @@ class IntegrationTest {
     void testExit() {
         in.writeLine("exit");
 
-        Main.main(new String[0]);
+        App.main(new String[0]);
 
         String expected = "Hello, type 'help' to get help or 'exit' to quit from program" + System.lineSeparator() +
             "Goodbye, see you later" + System.lineSeparator();
@@ -82,7 +82,7 @@ class IntegrationTest {
         in.writeLine("tables");
         in.writeLine("exit");
 
-        Main.main(new String[0]);
+        App.main(new String[0]);
 
         String expected = "Hello, type 'help' to get help or 'exit' to quit from program" + System.lineSeparator() +
             "First need to establish connection" + System.lineSeparator() +
@@ -95,7 +95,7 @@ class IntegrationTest {
         in.writeLine("connect " + connectionString);
         in.writeLine("exit");
 
-        Main.main(new String[0]);
+        App.main(new String[0]);
 
         String expected = "Hello, type 'help' to get help or 'exit' to quit from program" + System.lineSeparator() +
             "Database has opened successfully" + System.lineSeparator() +
@@ -110,7 +110,7 @@ class IntegrationTest {
         in.writeLine("drop " + TABLE_NAME);
         in.writeLine("exit");
 
-        Main.main(new String[0]);
+        App.main(new String[0]);
 
         String expected = "Hello, type 'help' to get help or 'exit' to quit from program" + System.lineSeparator() +
             "Database has opened successfully" + System.lineSeparator() +
@@ -129,7 +129,7 @@ class IntegrationTest {
         in.writeLine("drop " + TABLE_NAME);
         in.writeLine("exit");
 
-        Main.main(new String[0]);
+        App.main(new String[0]);
 
         String expected = "Hello, type 'help' to get help or 'exit' to quit from program" + System.lineSeparator() +
             "Database has opened successfully" + System.lineSeparator() +
@@ -155,7 +155,7 @@ class IntegrationTest {
         in.writeLine("drop " + TABLE_NAME);
         in.writeLine("exit");
 
-        Main.main(new String[0]);
+        App.main(new String[0]);
 
         String expected = "Hello, type 'help' to get help or 'exit' to quit from program" + System.lineSeparator() +
             "Database has opened successfully" + System.lineSeparator() +
@@ -181,7 +181,7 @@ class IntegrationTest {
         in.writeLine("drop " + TABLE_NAME);
         in.writeLine("exit");
 
-        Main.main(new String[0]);
+        App.main(new String[0]);
 
         String expected = "Hello, type 'help' to get help or 'exit' to quit from program" + System.lineSeparator() +
             "Database has opened successfully" + System.lineSeparator() +
@@ -202,7 +202,7 @@ class IntegrationTest {
         in.writeLine("drop " + TABLE_NAME);
         in.writeLine("exit");
 
-        Main.main(new String[0]);
+        App.main(new String[0]);
 
         String expected = "Hello, type 'help' to get help or 'exit' to quit from program" + System.lineSeparator() +
             "Database has opened successfully" + System.lineSeparator() +

@@ -1,137 +1,84 @@
 package ua.in.denoming.sqlcmd.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
+@SuppressWarnings("WeakerAccess")
 public class DataSet {
-    private ArrayList<Data> storage;
-
-    public static class Data {
-        String name;
-        Object value;
-
-        @Override
-        public String toString() {
-            return String.format("name='%s', value='%s'", name, value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name, value);
-        }
-
-        @Override
-        public boolean equals(Object otherObject) {
-            if (this == otherObject)
-                return true;
-            if (otherObject == null || getClass() != otherObject.getClass())
-                return false;
-
-            Data other = (Data) otherObject;
-            return Objects.equals(name, other.name) && Objects.equals(value, other.value);
-        }
-
-        public Data(String name, Object value) {
-            this.name = name;
-            this.value = value;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-    }
+    private Map<String, Object> storage;
 
     public DataSet() {
         this(0);
     }
 
     public DataSet(int capacity) {
-        this.storage = new ArrayList<>(capacity);
+        this.storage = new LinkedHashMap<>(capacity);
     }
 
-    public DataSet(Data... values) {
-        this.storage = new ArrayList<>(
-            Arrays.asList(values)
-        );
+    public void set(String name, Object value) {
+        storage.put(name, value);
     }
 
-    public void put(String name, Object value) {
-        storage.add(new Data(name, value));
+    public Object get(String name) {
+        return this.storage.get(name);
     }
 
-    public void set(int index, Data data) {
-        storage.set(index, data);
+    public Set<String> names() {
+        return Collections.unmodifiableSet(storage.keySet());
     }
 
-    public Data get(int index) {
-        return this.storage.get(index);
-    }
-
-    public String getString(int index) {
-        return String.valueOf(
-            this.storage.get(index).getValue()
-        );
-    }
-
-    public String[] getNames() {
-        if (storage.size() == 0) {
-            return new String[0];
-        }
-
-        String[] names = new String[storage.size()];
-        for (int i = 0; i < storage.size(); i++) {
-            names[i] = storage.get(i).name;
-        }
-        return names;
-    }
-
-    public Object[] getValues() {
-        if (storage.size() == 0) {
-            return new Object[0];
-        }
-
-        Object[] values = new Object[storage.size()];
-        for (int i = 0; i < storage.size(); i++) {
-            values[i] = storage.get(i).value;
-        }
-        return values;
+    public Collection<Object> values() {
+        return Collections.unmodifiableCollection(storage.values());
     }
 
     public int size() {
         return storage.size();
     }
 
-    @Override
-    public String toString() {
-        if (storage.size() == 0) {
-            return "DataSet {<empty>}";
-        }
-
-        StringBuilder builder = new StringBuilder("DataSet {").append(System.lineSeparator());
-        for (Data data : storage) {
-            builder.append('\t').append(data.toString()).append(System.lineSeparator());
-        }
-        return builder.append("}").toString();
+    public Iterator<Map.Entry<String, Object>> iterator() {
+        return storage.entrySet().iterator();
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+    public String toString() {
+        if (storage.size() == 0) {
+            return "";
+        }
 
-        DataSet dataSet = (DataSet) o;
-        return Objects.equals(storage, dataSet.storage);
+        int counter = 0;
+        StringBuilder builder = new StringBuilder("[");
+        for (Map.Entry<String, Object> entries : storage.entrySet()) {
+            if (counter > 0) {
+                builder.append(", ");
+            }
+            builder
+                .append("'")
+                .append(entries.getKey())
+                .append("' = '")
+                .append(entries.getValue())
+                .append("'");
+            counter++;
+        }
+        return builder.append("]").toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(storage);
+        return storage.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object otherObject) {
+        if (this == otherObject)
+            return true;
+        if (otherObject == null || getClass() != otherObject.getClass())
+            return false;
+
+        DataSet other = (DataSet) otherObject;
+        return storage.equals(other.storage);
     }
 }

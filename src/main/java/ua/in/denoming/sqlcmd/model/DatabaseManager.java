@@ -20,7 +20,7 @@ public interface DatabaseManager {
 
     boolean isTableExists(String tableName);
 
-    List<DataSet> obtainTableData(String tableName);
+    List<DataSet> getData(String tableName);
 
     void insertData(String tableName, DataSet dataSet);
 

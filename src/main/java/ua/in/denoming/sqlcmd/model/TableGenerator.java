@@ -1,9 +1,10 @@
 package ua.in.denoming.sqlcmd.model;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class TableGenerator {
@@ -12,14 +13,14 @@ public class TableGenerator {
     private static final String TABLE_V_SPLIT_SYMBOL = "|";
     private static final String TABLE_H_SPLIT_SYMBOL = "-";
 
-    public String generate(List<DataSet> data) {
-        if (data.size() == 0) {
+    public String generate(List<DataSet> tableData) {
+        if (tableData.size() == 0) {
             return "";
         }
 
         StringBuilder stringBuilder = new StringBuilder();
-        List<String> headers = generateHeaders(data);
-        List<List<String>> rows = generateRows(data);
+        List<String> headers = generateHeaders(tableData);
+        List<List<String>> rows = generateRows(tableData);
 
         Map<Integer, Integer> columnMaxWidthMapping = getMaximumWidthOfTable(headers, rows);
 
@@ -46,30 +47,28 @@ public class TableGenerator {
         return stringBuilder.toString();
     }
 
-    private List<String> generateHeaders(List<DataSet> dataSets) {
-        if (dataSets.size() == 0) {
-            return new LinkedList<>();
+    private List<String> generateHeaders(List<DataSet> tableData) {
+        if (tableData.size() == 0) {
+            return Collections.emptyList();
         }
 
-        return Arrays.asList(
-            dataSets.get(0).getNames()
-        );
+        Collection<String> names = tableData.iterator().next().names();
+        return new ArrayList<>(names);
     }
 
-    private List<List<String>> generateRows(List<DataSet> dataSets) {
-        if (dataSets.size() == 0) {
-            return new LinkedList<>();
+    private List<List<String>> generateRows(List<DataSet> tableData) {
+        if (tableData.size() == 0) {
+            return Collections.emptyList() ;
         }
 
-        List<List<String>> rows = new LinkedList<>();
-        for (DataSet dataSet : dataSets) {
-            List<String> row = new LinkedList<>();
-            for (int i = 0; i < dataSet.size(); i++) {
-                row.add(dataSet.getString(i).trim());
+        List<List<String>> rows = new ArrayList<>(tableData.size());
+        for (DataSet dataSet : tableData) {
+            List<String> row = new ArrayList<>(dataSet.size());
+            for (Object value : dataSet.values()) {
+                row.add(value.toString());
             }
             rows.add(row);
         }
-
         return rows;
     }
 

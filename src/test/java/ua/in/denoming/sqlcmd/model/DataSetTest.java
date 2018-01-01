@@ -3,21 +3,20 @@ package ua.in.denoming.sqlcmd.model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class DataSetTest {
+    private final int DATA_SET_CAPACITY = 3;
     private DataSet dataSet;
 
     @BeforeEach
     void setup() {
-        dataSet = new DataSet(
-            new DataSet.Data("column1", "value1"),
-            new DataSet.Data("column2", "value2"),
-            new DataSet.Data("column3", "value3")
-        );
+        dataSet = new DataSet(DATA_SET_CAPACITY);
+        dataSet.set("column1", "value1");
+        dataSet.set("column2", "value2");
+        dataSet.set("column3", "value3");
     }
 
     @Test
@@ -28,66 +27,64 @@ class DataSetTest {
 
     @Test
     void testSize() {
-        assertEquals(3, dataSet.size());
+        assertEquals(DATA_SET_CAPACITY, dataSet.size());
     }
 
     @Test
     void testGet() {
-        assertAll("Index 0",
-            () -> assertEquals("column1", dataSet.get(0).getName()),
-            () -> assertEquals("value1", dataSet.get(0).getValue())
-        );
-        assertAll("Index 1",
-            () -> assertEquals("column2", dataSet.get(1).getName()),
-            () -> assertEquals("value2", dataSet.get(1).getValue())
-        );
-        assertAll("Index 2",
-            () -> assertEquals("column3", dataSet.get(2).getName()),
-            () -> assertEquals("value3", dataSet.get(2).getValue())
+        assertAll("Get values",
+            () -> assertEquals("value1", dataSet.get("column1")),
+            () -> assertEquals("value2", dataSet.get("column2")),
+            () -> assertEquals("value3", dataSet.get("column3"))
         );
     }
 
     @Test
     void testSet() {
-        dataSet.set(0, new DataSet.Data("column4", "value4"));
-        dataSet.set(1, new DataSet.Data("column5", "value5"));
-        dataSet.set(2, new DataSet.Data("column6", "value6"));
+        dataSet.set("column1", "value4");
+        dataSet.set("column2", "value5");
+        dataSet.set("column3", "value6");
 
-        assertAll("Index 0",
-            () -> assertEquals("column4", dataSet.get(0).getName()),
-            () -> assertEquals("value4", dataSet.get(0).getValue())
-        );
-        assertAll("Index 1",
-            () -> assertEquals("column5", dataSet.get(1).getName()),
-            () -> assertEquals("value5", dataSet.get(1).getValue())
-        );
-        assertAll("Index 2",
-            () -> assertEquals("column6", dataSet.get(2).getName()),
-            () -> assertEquals("value6", dataSet.get(2).getValue())
+        assertAll("Set values",
+            () -> assertEquals("value4", dataSet.get("column1")),
+            () -> assertEquals("value5", dataSet.get("column2")),
+            () -> assertEquals("value6", dataSet.get("column3"))
         );
     }
 
     @Test
-    void testGetString() {
-        assertEquals("value1", dataSet.getString(0));
-        assertEquals("value2", dataSet.getString(1));
-        assertEquals("value3", dataSet.getString(2));
+    void testNames() {
+        assertEquals(
+            Arrays.asList("column1", "column2", "column3").toString(),
+            dataSet.names().toString()
+        );
     }
 
     @Test
-    void testGetNames() {
-        assertArrayEquals(new String[]{"column1", "column2", "column3"}, dataSet.getNames());
+    void testValues() {
+        assertEquals(
+            Arrays.asList("value1", "value2", "value3").toString(),
+            dataSet.values().toString()
+        );
     }
 
     @Test
-    void testGetValues() {
-        assertArrayEquals(new String[]{"value1", "value2", "value3"}, dataSet.getValues());
+    void testStringConversion() {
+        assertEquals(
+            "['column1' = 'value1', 'column2' = 'value2', 'column3' = 'value3']",
+            dataSet.toString()
+        );
     }
 
     @Test
-    void testIncorrectIndex() {
-        assertThrows(IndexOutOfBoundsException.class, () -> dataSet.get(-1));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataSet.set(-1, null));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataSet.getString(-1));
+    void testEqualComparison() {
+        DataSet otherDataSet = new DataSet(DATA_SET_CAPACITY);
+        otherDataSet.set("column1", "value1");
+        otherDataSet.set("column2", "value2");
+        otherDataSet.set("column3", "value3");
+        assertEquals(otherDataSet, dataSet);
+
+        otherDataSet.set("column1", "some new value");
+        assertNotEquals(otherDataSet, dataSet);
     }
 }
