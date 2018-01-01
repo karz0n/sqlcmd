@@ -1,7 +1,7 @@
 package ua.in.denoming.sqlcmd.model.command;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
+import ua.in.denoming.sqlcmd.model.exception.WrongArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 public class Delete implements Command {
@@ -23,7 +23,7 @@ public class Delete implements Command {
     @Override
     public void execute(String... args) {
         if (!canExecute(args)) {
-            throw new WrongCommandArgumentsException();
+            throw new WrongArgumentsException();
         }
 
         String tableName = args[0];

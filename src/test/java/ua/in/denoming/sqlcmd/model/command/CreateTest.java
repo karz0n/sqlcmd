@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
+import ua.in.denoming.sqlcmd.model.exception.WrongArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,9 +32,9 @@ class CreateTest {
 
     @Test
     void testWrongCallOfExecute() {
-        assertThrows(WrongCommandArgumentsException.class, command::execute);
+        assertThrows(WrongArgumentsException.class, command::execute);
         assertThrows(
-            WrongCommandArgumentsException.class,
+            WrongArgumentsException.class,
             () -> command.execute("wrong")
         );
     }

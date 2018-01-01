@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.WrongCommandArgumentsException;
+import ua.in.denoming.sqlcmd.model.exception.WrongArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,9 +33,9 @@ class FindTest {
 
     @Test
     void testWrongCallOfExecute() {
-        assertThrows(WrongCommandArgumentsException.class, command::execute);
+        assertThrows(WrongArgumentsException.class, command::execute);
         assertThrows(
-            WrongCommandArgumentsException.class, () -> command.execute("too", "many", "arguments")
+            WrongArgumentsException.class, () -> command.execute("too", "many", "arguments")
         );
     }
 
@@ -49,7 +49,7 @@ class FindTest {
         //
         // Then
         //
-        verify(databaseManager, times(1)).obtainTableData(anyString());
+        verify(databaseManager, times(1)).getData(anyString());
         verify(view, atLeastOnce()).writeLine(anyString());
     }
 }
