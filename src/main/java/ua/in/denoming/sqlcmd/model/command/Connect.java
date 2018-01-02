@@ -1,7 +1,8 @@
 package ua.in.denoming.sqlcmd.model.command;
 
+import org.apache.commons.lang3.Validate;
+
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.WrongArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 public class Connect implements Command {
@@ -22,9 +23,7 @@ public class Connect implements Command {
 
     @Override
     public void execute(String... args) {
-        if (!canExecute(args)) {
-            throw new WrongArgumentsException("Incorrect count of arguments");
-        }
+        Validate.isTrue(canExecute(args));
 
         String url = args[0];
         String userName = args[1];

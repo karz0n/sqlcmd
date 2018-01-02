@@ -1,6 +1,11 @@
 package ua.in.denoming.sqlcmd.model;
 
-import ua.in.denoming.sqlcmd.model.exception.*;
+import org.apache.commons.lang3.Validate;
+
+import ua.in.denoming.sqlcmd.model.exception.ConnectionRefusedException;
+import ua.in.denoming.sqlcmd.model.exception.DatabaseException;
+import ua.in.denoming.sqlcmd.model.exception.NotConnectedException;
+import ua.in.denoming.sqlcmd.model.exception.WrongCredentialException;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -31,7 +36,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      * @param drivers list of drivers separated by semicolon
      */
     public static void registerDrivers(String drivers) {
-        Objects.requireNonNull(drivers);
+        Validate.notEmpty(drivers);
 
         try {
             String[] items = drivers.split(";");
@@ -61,9 +66,9 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public void open(String url, String user, String password) throws DatabaseException {
-        Objects.requireNonNull(url);
-        Objects.requireNonNull(user);
-        Objects.requireNonNull(password);
+        Validate.notEmpty(url);
+        Validate.notEmpty(user);
+        Validate.notEmpty(password);
 
         try {
             if (isOpen()) {
@@ -164,10 +169,8 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public void createTable(String tableName, String... columns) {
-        Objects.requireNonNull(tableName);
-        if (columns.length == 0) {
-            throw new WrongArgumentsException("Incorrect column count");
-        }
+        Validate.notEmpty(tableName);
+        Validate.isTrue(columns.length > 0);
 
         if (!isOpen()) {
             throw new NotConnectedException();
@@ -192,7 +195,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public void clearTable(String tableName) {
-        Objects.requireNonNull(tableName);
+        Validate.notEmpty(tableName);
 
         if (!isOpen()) {
             throw new NotConnectedException();
@@ -217,7 +220,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public void deleteTable(String tableName) {
-        Objects.requireNonNull(tableName);
+        Validate.notEmpty(tableName);
 
         if (!isOpen()) {
             throw new NotConnectedException();
@@ -242,7 +245,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public boolean isTableExists(String tableName) {
-        Objects.requireNonNull(tableName);
+        Validate.notEmpty(tableName);
 
         if (!isOpen()) {
             throw new NotConnectedException();
@@ -269,7 +272,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public List<DataSet> getData(String tableName) {
-        Objects.requireNonNull(tableName);
+        Validate.notEmpty(tableName);
 
         if (!isOpen()) {
             throw new NotConnectedException();
@@ -308,8 +311,8 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public void insertData(String tableName, DataSet dataSet) {
-        Objects.requireNonNull(tableName);
-        Objects.requireNonNull(dataSet);
+        Validate.notEmpty(tableName);
+        Validate.isTrue(dataSet.size() > 0);
 
         if (!isOpen()) {
             throw new NotConnectedException();
@@ -337,10 +340,10 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public void updateData(String tableName, String columnName, String searchValue, String value) {
-        Objects.requireNonNull(tableName);
-        Objects.requireNonNull(columnName);
-        Objects.requireNonNull(searchValue);
-        Objects.requireNonNull(value);
+        Validate.notEmpty(tableName);
+        Validate.notEmpty(columnName);
+        Validate.notEmpty(searchValue);
+        Validate.notNull(value);
 
         if (!isOpen()) {
             throw new NotConnectedException();
@@ -367,9 +370,9 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      */
     @Override
     public void deleteData(String tableName, String columnName, String searchValue) {
-        Objects.requireNonNull(tableName);
-        Objects.requireNonNull(columnName);
-        Objects.requireNonNull(searchValue);
+        Validate.notEmpty(tableName);
+        Validate.notEmpty(columnName);
+        Validate.notEmpty(searchValue);
 
         if (!isOpen()) {
             throw new NotConnectedException();
