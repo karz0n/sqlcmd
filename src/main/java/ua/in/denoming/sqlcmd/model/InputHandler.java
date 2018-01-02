@@ -29,6 +29,10 @@ public class InputHandler {
                 String[] commandParts = view.readLine().trim().split("\\s+");
 
                 String commandName = commandParts[0].toLowerCase();
+                if (commandName.length() == 0) {
+                    continue;
+                }
+
                 if (getExitCommand().equalsIgnoreCase(commandName)) {
                     if (exitBanner != null) {
                         view.writeLine(exitBanner);
