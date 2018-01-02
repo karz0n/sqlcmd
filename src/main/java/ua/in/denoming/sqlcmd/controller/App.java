@@ -26,6 +26,7 @@ public class App implements Runnable, AutoCloseable {
 
     /**
      * Main method
+     *
      * @param args arguments of program
      */
     public static void main(String[] args) {

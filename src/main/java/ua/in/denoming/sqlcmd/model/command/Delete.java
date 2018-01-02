@@ -23,7 +23,7 @@ public class Delete implements Command {
     @Override
     public void execute(String... args) {
         if (!canExecute(args)) {
-            throw new WrongArgumentsException();
+            throw new WrongArgumentsException("Incorrect count of arguments");
         }
 
         String tableName = args[0];

@@ -74,12 +74,12 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         } catch (SQLException e) {
             String errorState = e.getSQLState();
 
-            if (errorStates.isWrongPassword(errorState)) {
-                throw new WrongPasswordException();
+            if (errorStates.isConnectionRefused(errorState)) {
+                throw new ConnectionRefusedException(String.format("Connect to '%s' url has refused", url), e);
             }
 
-            if (errorStates.isDatabaseNotFound(errorState)) {
-                throw new DatabaseNotFoundException();
+            if (errorStates.isWrongPassword(errorState)) {
+                throw new WrongCredentialException("Incorrect open connection user credential", e);
             }
 
             throw new DatabaseException(String.format("Open database connection by '%s' url", url), e);
@@ -329,16 +329,16 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      * Update data of table
      *
      * @param tableName name of table
-     * @param column specific column name
+     * @param columnName specific column name
      * @param searchValue value to search in specific column
      * @param value new value
      * @throws NotConnectedException if connection wasn't established
      * @throws DatabaseException if there is database exception
      */
     @Override
-    public void updateData(String tableName, String column, String searchValue, String value) {
+    public void updateData(String tableName, String columnName, String searchValue, String value) {
         Objects.requireNonNull(tableName);
-        Objects.requireNonNull(column);
+        Objects.requireNonNull(columnName);
         Objects.requireNonNull(searchValue);
         Objects.requireNonNull(value);
 
@@ -349,7 +349,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         try (
             Statement statement = connection.createStatement()
         ) {
-            String updatingDataString = JdbcDatabaseManager.getUpdatingDataQueryString(tableName, column, searchValue, value);
+            String updatingDataString = JdbcDatabaseManager.getUpdatingDataQueryString(tableName, columnName, searchValue, value);
             statement.executeUpdate(updatingDataString);
         } catch (SQLException e) {
             throw new DatabaseException(String.format("Update data of '%s' table", tableName), e);
@@ -360,15 +360,15 @@ public final class JdbcDatabaseManager implements DatabaseManager {
      * Delete data in specific table
      *
      * @param tableName name of table
-     * @param column specific column name
+     * @param columnName specific column name
      * @param searchValue value to search in specific column
      * @throws NotConnectedException if connection wasn't established
      * @throws DatabaseException if there is database exception
      */
     @Override
-    public void deleteData(String tableName, String column, String searchValue) {
+    public void deleteData(String tableName, String columnName, String searchValue) {
         Objects.requireNonNull(tableName);
-        Objects.requireNonNull(column);
+        Objects.requireNonNull(columnName);
         Objects.requireNonNull(searchValue);
 
         if (!isOpen()) {
@@ -378,7 +378,7 @@ public final class JdbcDatabaseManager implements DatabaseManager {
         try (
             Statement statement = connection.createStatement()
         ) {
-            String deletingDataString = JdbcDatabaseManager.getDeletingDataQueryString(tableName, column, searchValue);
+            String deletingDataString = JdbcDatabaseManager.getDeletingDataQueryString(tableName, columnName, searchValue);
             statement.executeUpdate(deletingDataString);
         } catch (SQLException e) {
             throw new DatabaseException(String.format("Delete data in '%s' table", tableName), e);

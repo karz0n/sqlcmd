@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 public class DataSet {
@@ -16,7 +17,15 @@ public class DataSet {
     }
 
     public DataSet(int capacity) {
-        this.storage = new LinkedHashMap<>(capacity);
+        storage = new LinkedHashMap<>(capacity);
+    }
+
+    public DataSet(List<Map.Entry<String, Object>> entries) {
+        this(entries.size());
+
+        entries.forEach(
+            entry -> storage.put(entry.getKey(), entry.getValue())
+        );
     }
 
     public void set(String name, Object value) {

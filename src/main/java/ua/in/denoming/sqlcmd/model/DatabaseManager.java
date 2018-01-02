@@ -24,7 +24,7 @@ public interface DatabaseManager {
 
     void insertData(String tableName, DataSet dataSet);
 
-    void updateData(String tableName, String column, String searchValue, String value);
+    void updateData(String tableName, String columnName, String searchValue, String value);
 
-    void deleteData(String tableName, String column, String searchValue);
+    void deleteData(String tableName, String columnName, String searchValue);
 }

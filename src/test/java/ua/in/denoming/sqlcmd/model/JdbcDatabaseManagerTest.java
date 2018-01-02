@@ -7,8 +7,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import ua.in.denoming.sqlcmd.model.exception.ConnectionRefusedException;
+import ua.in.denoming.sqlcmd.model.exception.WrongCredentialException;
 import ua.in.denoming.sqlcmd.TestProperties;
 
+import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,121 +23,150 @@ import static org.junit.jupiter.api.Assertions.*;
 class JdbcDatabaseManagerTest {
     private static TestProperties testProperties = new TestProperties();
 
-    private DatabaseManager databaseManager;
+    private DatabaseManager databaseManager = new JdbcDatabaseManager(
+        new PostgreSqlErrorStates()
+    );
 
     @BeforeAll
     void setup() {
         JdbcDatabaseManager.registerDrivers("org.postgresql.Driver");
-
-        databaseManager = new JdbcDatabaseManager(new PostgreSqlErrorStates());
-        databaseManager.open(
-            JdbcDatabaseManagerTest.testProperties.getDatabaseUrl(),
-            JdbcDatabaseManagerTest.testProperties.getDatabaseUserName(),
-            JdbcDatabaseManagerTest.testProperties.getDatabasePassword()
-        );
-    }
-
-    @AfterAll
-    void cleanup() {
-        databaseManager.close();
     }
 
     @Test
-    @DisplayName("database has opened")
-    void isOpen() {
-        assertTrue(databaseManager.isOpen());
+    void testOpenState() {
+        assertFalse(databaseManager.isOpen());
+    }
+
+    @Test
+    void testWrongDatabaseOpening() {
+        assertThrows(ConnectionRefusedException.class, () -> databaseManager.open(
+            "jdbc:postgresql://localhost/missing_database",
+            "someName",
+            "somePassword"
+        ));
+    }
+
+    @Test
+    void testWrongCredential() {
+        assertThrows(WrongCredentialException.class, () -> databaseManager.open(
+            JdbcDatabaseManagerTest.testProperties.getDatabaseUrl(),
+            "someName",
+            "somePassword"
+        ));
     }
 
     @Nested
-    @DisplayName("after creating table")
+    @DisplayName("after database opening")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    class AfterTableCreating {
-        private final String TABLE_NAME = "TEST_TABLE";
-
+    class AfterDatabaseOpening {
         @BeforeAll
-        void createTable() {
-            databaseManager.createTable(TABLE_NAME, "column1", "column2", "column3");
-            assertTrue(databaseManager.isTableExists(TABLE_NAME));
+        void setup() {
+            databaseManager.open(
+                JdbcDatabaseManagerTest.testProperties.getDatabaseUrl(),
+                JdbcDatabaseManagerTest.testProperties.getDatabaseUserName(),
+                JdbcDatabaseManagerTest.testProperties.getDatabasePassword()
+            );
         }
 
         @AfterAll
-        void deleteTable() {
-            databaseManager.deleteTable(TABLE_NAME);
-            assertFalse(databaseManager.isTableExists(TABLE_NAME));
+        void cleanup() {
+            databaseManager.close();
         }
 
         @Test
-        @DisplayName("table exists")
-        void isTableExists() {
-            assertTrue(databaseManager.isTableExists(TABLE_NAME));
+        void testOpenState() {
+            assertTrue(databaseManager.isOpen());
         }
 
         @Nested
-        @DisplayName("after inserting data")
+        @DisplayName("after table creating")
         @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-        class AfterDataInserting {
-            private DataSet tableData;
+        class AfterTableCreating {
+            private final String TABLE_NAME = "TEST_TABLE";
 
             @BeforeAll
-            void insertData() {
-                tableData = new DataSet();
-                tableData.set("column1", "value1");
-                tableData.set("column2", "value2");
-                tableData.set("column3", "value3");
+            void setup() {
+                databaseManager.createTable(TABLE_NAME, "column1", "column2", "column3");
+            }
 
-                databaseManager.insertData(TABLE_NAME, tableData);
+            @AfterAll
+            void cleanup() {
+                databaseManager.deleteTable(TABLE_NAME);
             }
 
             @Test
-            @DisplayName("data have inserted")
-            void isDataExists() {
-                List<DataSet> dataSets = databaseManager.getData(TABLE_NAME);
-                assertEquals(1, dataSets.size());
-                assertEquals(dataSets.get(0), tableData);
+            void isTableExists() {
+                assertTrue(databaseManager.isTableExists(TABLE_NAME));
             }
 
-            @Test
-            @DisplayName("data have updated")
-            void testUpdateData() {
-                Iterator<Map.Entry<String, Object>> iterator = tableData.iterator();
+            @Nested
+            @DisplayName("after inserting data")
+            @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+            class AfterDataInserting {
+                private final DataSet TABLE_DATA = new DataSet(Arrays.asList(
+                    new AbstractMap.SimpleEntry<>("column1", "value1"),
+                    new AbstractMap.SimpleEntry<>("column2", "value2"),
+                    new AbstractMap.SimpleEntry<>("column3", "value3")
+                ));
 
-                Map.Entry<String, Object> firstEntry = iterator.next();
-                String column = firstEntry.getKey();
-                String searchValue = firstEntry.getValue().toString();
-                String value = "value";
+                @Test
+                void testInsertData() {
+                    databaseManager.insertData(TABLE_NAME, TABLE_DATA);
 
-                databaseManager.updateData(
-                    TABLE_NAME,
-                    column,
-                    searchValue,
-                    value
-                );
+                    List<DataSet> insertedTableData = databaseManager.getData(TABLE_NAME);
+                    assertEquals(1, insertedTableData.size());
+                    assertEquals(insertedTableData.get(0), TABLE_DATA);
 
-                List<DataSet> tableData = databaseManager.getData(TABLE_NAME);
-                assertEquals(1, tableData.size());
-
-                DataSet dataSet = new DataSet();
-                dataSet.set(column, value);
-                while (iterator.hasNext()) {
-                    Map.Entry<String, Object> entry = iterator.next();
-                    dataSet.set(entry.getKey(), entry.getValue());
+                    databaseManager.clearTable(TABLE_NAME);
                 }
 
-                assertEquals(tableData.get(0), dataSet);
-            }
+                @Test
+                void testUpdateData() {
+                    databaseManager.insertData(TABLE_NAME, TABLE_DATA);
 
-            @Test
-            @DisplayName("data have deleted")
-            void testDeleteData() {
-                Map.Entry<String, Object> firstEntry = tableData.iterator().next();
+                    Iterator<Map.Entry<String, Object>> iterator = TABLE_DATA.iterator();
 
-                String column = firstEntry.getKey();
-                String searchValue = firstEntry.getValue().toString();
+                    Map.Entry<String, Object> firstEntry = iterator.next();
+                    String columnName = firstEntry.getKey();
+                    String searchValue = firstEntry.getValue().toString();
+                    String value = "value";
+                    databaseManager.updateData(
+                        TABLE_NAME,
+                        columnName,
+                        searchValue,
+                        value
+                    );
 
-                databaseManager.deleteData(TABLE_NAME, column, searchValue);
+                    DataSet dataSet = new DataSet();
+                    dataSet.set(columnName, value);
+                    while (iterator.hasNext()) {
+                        Map.Entry<String, Object> entry = iterator.next();
+                        dataSet.set(entry.getKey(), entry.getValue());
+                    }
 
-                List<DataSet> dataSets = databaseManager.getData(TABLE_NAME);
-                assertEquals(1, dataSets.size());
+                    List<DataSet> tableData = databaseManager.getData(TABLE_NAME);
+                    assertEquals(1, tableData.size());
+                    assertEquals(tableData.get(0), dataSet);
+
+                    databaseManager.clearTable(TABLE_NAME);
+                }
+
+                @Test
+                void testDeleteData() {
+                    databaseManager.insertData(TABLE_NAME, TABLE_DATA);
+
+                    Map.Entry<String, Object> firstEntry = TABLE_DATA.iterator().next();
+                    String column = firstEntry.getKey();
+                    String searchValue = firstEntry.getValue().toString();
+                    databaseManager.deleteData(
+                        TABLE_NAME,
+                        column,
+                        searchValue
+                    );
+
+                    List<DataSet> dataSets = databaseManager.getData(TABLE_NAME);
+                    assertEquals(0, dataSets.size());
+                }
             }
         }
     }
