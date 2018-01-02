@@ -2,10 +2,7 @@ package ua.in.denoming.sqlcmd.model;
 
 import org.apache.commons.lang3.Validate;
 
-import ua.in.denoming.sqlcmd.model.exception.ConnectionRefusedException;
-import ua.in.denoming.sqlcmd.model.exception.DatabaseException;
-import ua.in.denoming.sqlcmd.model.exception.NotConnectedException;
-import ua.in.denoming.sqlcmd.model.exception.WrongCredentialException;
+import ua.in.denoming.sqlcmd.model.exception.*;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -20,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -83,7 +79,11 @@ public final class JdbcDatabaseManager implements DatabaseManager {
                 throw new ConnectionRefusedException(String.format("Connect to '%s' url has refused", url), e);
             }
 
-            if (errorStates.isWrongPassword(errorState)) {
+            if (errorStates.isDatabaseNotFound(errorState)) {
+                throw new DatabaseNotFoundException(String.format("Database by '%s' url not found", url), e);
+            }
+
+            if (errorStates.isWrongCredential(errorState)) {
                 throw new WrongCredentialException("Incorrect open connection user credential", e);
             }
 
