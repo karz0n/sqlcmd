@@ -10,10 +10,10 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <junit.jupiter.version>5.0.2</junit.jupiter.version>
+        <junit.version>5.0.2</junit.version>
         <mockito.version>1.10.19</mockito.version>
         <postgresql.version>42.1.4</postgresql.version>
-        <text-table-formatter.version>1.0</text-table-formatter.version>
+        <commons.version>3.7</commons.version>
     </properties>
 
     <build>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.0.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -48,9 +48,9 @@
             <version>${postgresql.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ow2.sirocco</groupId>
-            <artifactId>sirocco-text-table-formatter</artifactId>
-            <version>${text-table-formatter.version}</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons.version}</version>
         </dependency>
     </dependencies>
 </project>
