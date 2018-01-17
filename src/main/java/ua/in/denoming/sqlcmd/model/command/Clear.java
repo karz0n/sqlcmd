@@ -26,8 +26,14 @@ public class Clear implements Command {
         Validate.isTrue(canExecute(args));
 
         String tableName = args[0];
-        databaseManager.clearTable(tableName);
+        if (!databaseManager.isTableExists(tableName)) {
+            view.writeLine(String.format("Table with '%s' name not exists", tableName));
+            String tables = databaseManager.getTables().toString();
+            view.writeLine(tables);
+            return;
+        }
 
+        databaseManager.clearTable(tableName);
         view.writeFormatLine("Table '%s' has cleared successfully", tableName);
     }
 }

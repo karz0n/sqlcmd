@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.WrongArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,23 +31,19 @@ class ConnectTest {
 
     @Test
     void testWrongCallOfExecute() {
-        assertThrows(WrongArgumentsException.class, command::execute);
+        assertThrows(IllegalArgumentException.class, command::execute);
         assertThrows(
-            WrongArgumentsException.class,
+            IllegalArgumentException.class,
             () -> command.execute("too", "many", "arguments", "and", "more")
         );
     }
 
     @Test
-    void testConnect() {
-        //
+    void testExecute() {
         // When
-        //
         command.execute("someUrl", "someUserName", "somePassword");
 
-        //
         // Then
-        //
         verify(databaseManager, times(1)).open(anyString(), anyString(), anyString());
         verify(view, atLeastOnce()).writeLine(anyString());
     }

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.WrongArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,23 +32,39 @@ class FindTest {
 
     @Test
     void testWrongCallOfExecute() {
-        assertThrows(WrongArgumentsException.class, command::execute);
+        assertThrows(IllegalArgumentException.class, command::execute);
         assertThrows(
-            WrongArgumentsException.class, () -> command.execute("too", "many", "arguments")
+            IllegalArgumentException.class, () -> command.execute("too", "many", "arguments")
         );
     }
 
     @Test
     void testExecute() {
-        //
-        // When
-        //
-        command.execute("tableName");
+        String tableName = "someTable";
 
-        //
+        // Given
+        when(databaseManager.isTableExists(tableName)).thenReturn(true);
+
+        // When
+        command.execute(tableName);
+
         // Then
-        //
         verify(databaseManager, times(1)).getData(anyString());
+        verify(view, atLeastOnce()).writeLine(anyString());
+    }
+
+    @Test
+    void testExecuteWithAbsentTable() {
+        String tableName = "someTable";
+
+        // Given
+        when(databaseManager.isTableExists(tableName)).thenReturn(false);
+
+        // When
+        command.execute(tableName);
+
+        // Then
+        verify(databaseManager, times(1)).getTables();
         verify(view, atLeastOnce()).writeLine(anyString());
     }
 }

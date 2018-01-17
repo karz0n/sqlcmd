@@ -26,8 +26,14 @@ public class Drop implements Command {
         Validate.isTrue(canExecute(args));
 
         String tableName = args[0];
-        databaseManager.deleteTable(tableName);
+        if (!databaseManager.isTableExists(tableName)) {
+            view.writeLine(String.format("Table with '%s' name not exists", tableName));
+            String tables = databaseManager.getTables().toString();
+            view.writeLine(tables);
+            return;
+        }
 
+        databaseManager.deleteTable(tableName);
         view.writeFormatLine("Table '%s' has dropped successfully", tableName);
     }
 }

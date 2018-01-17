@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ua.in.denoming.sqlcmd.model.DatabaseManager;
-import ua.in.denoming.sqlcmd.model.exception.WrongArgumentsException;
 import ua.in.denoming.sqlcmd.view.View;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,24 +31,39 @@ class CreateTest {
 
     @Test
     void testWrongCallOfExecute() {
-        assertThrows(WrongArgumentsException.class, command::execute);
+        assertThrows(IllegalArgumentException.class, command::execute);
         assertThrows(
-            WrongArgumentsException.class,
+            IllegalArgumentException.class,
             () -> command.execute("wrong")
         );
     }
 
     @Test
-    void testConnect() {
-        //
-        // When
-        //
-        command.execute("table", "column1", "column2");
+    void testExecute() {
+        String tableName = "someTable";
 
-        //
+        // Given
+        when(databaseManager.isTableExists(tableName)).thenReturn(false);
+
+        // When
+        command.execute(tableName, "column1", "column2");
+
         // Then
-        //
         verify(databaseManager, times(1)).createTable(anyString(), anyVararg());
         verify(view, atLeastOnce()).writeFormatLine(anyString(), anyVararg());
+    }
+
+    @Test
+    void testExecuteWithAlreadyExistsTable() {
+        String tableName = "someTable";
+
+        // Given
+        when(databaseManager.isTableExists(tableName)).thenReturn(true);
+
+        // When
+        command.execute(tableName, "column1", "column2");
+
+        // Then
+        verify(view, atLeastOnce()).writeLine(anyString());
     }
 }

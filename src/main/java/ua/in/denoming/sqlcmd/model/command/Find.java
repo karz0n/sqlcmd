@@ -34,14 +34,12 @@ public class Find implements Command {
         String tableName = args[0];
         if (!databaseManager.isTableExists(tableName)) {
             view.writeLine(String.format("Table with '%s' name not exists", tableName));
-
             String tables = databaseManager.getTables().toString();
             view.writeLine(tables);
-
             return;
         }
-        List<DataSet> tableData = databaseManager.getData(tableName);
 
+        List<DataSet> tableData = databaseManager.getData(tableName);
         view.writeLine(tableGenerator.generate(tableData));
     }
 }

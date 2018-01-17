@@ -26,6 +26,11 @@ public class Create implements Command {
         Validate.isTrue(canExecute(args));
 
         String tableName = args[0];
+        if (databaseManager.isTableExists(tableName)) {
+            view.writeLine(String.format("Table with '%s' name has already exists", tableName));
+            return;
+        }
+
         String[] columns = Arrays.copyOfRange(args, 1, args.length);
         databaseManager.createTable(tableName, columns);
 

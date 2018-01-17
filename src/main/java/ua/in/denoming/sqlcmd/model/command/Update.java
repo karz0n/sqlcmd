@@ -26,6 +26,13 @@ public class Update implements Command {
         Validate.isTrue(canExecute(args));
 
         String tableName = args[0];
+        if (!databaseManager.isTableExists(tableName)) {
+            view.writeLine(String.format("Table with '%s' name not exists", tableName));
+            String tables = databaseManager.getTables().toString();
+            view.writeLine(tables);
+            return;
+        }
+
         String column = args[1];
         String searchValue = args[2];
         String value = args[3];

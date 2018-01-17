@@ -19,11 +19,8 @@ public class Insert implements Command {
 
     @Override
     public boolean canExecute(String... args) {
-        if (args.length == 1) {
-            return false;
-        }
         int remainder = (args.length - 1) % 2;
-        return (remainder == 0);
+        return (args.length != 1) && (remainder == 0);
     }
 
     @Override
@@ -31,6 +28,13 @@ public class Insert implements Command {
         Validate.isTrue(canExecute(args));
 
         String tableName = args[0];
+        if (!databaseManager.isTableExists(tableName)) {
+            view.writeLine(String.format("Table with '%s' name not exists", tableName));
+            String tables = databaseManager.getTables().toString();
+            view.writeLine(tables);
+            return;
+        }
+
         String[] values = Arrays.copyOfRange(args, 1, args.length);
         DataSet dataSet = createDataSet(values);
         databaseManager.insertData(tableName, dataSet);
@@ -41,7 +45,7 @@ public class Insert implements Command {
     private DataSet createDataSet(String... items) {
         DataSet dataSet = new DataSet(items.length / 2);
         for (int i = 0; i < items.length; i += 2) {
-            String name = (String) items[i];
+            String name = items[i];
             dataSet.set(name, items[i + 1]);
         }
         return dataSet;
