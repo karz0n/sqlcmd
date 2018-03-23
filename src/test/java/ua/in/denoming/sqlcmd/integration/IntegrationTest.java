@@ -3,7 +3,7 @@ package ua.in.denoming.sqlcmd.integration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ua.in.denoming.sqlcmd.TestProperties;
+import ua.in.denoming.sqlcmd.DatabaseProperties;
 import ua.in.denoming.sqlcmd.controller.App;
 
 import java.io.PrintStream;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class IntegrationTest {
     private static final String TABLE_NAME = "TEST_TABLE";
 
-    private static TestProperties testProperties = new TestProperties();
+    private static DatabaseProperties databaseProperties = new DatabaseProperties();
 
     private ConfigurableInputStream in;
     private LogOutputStream out;
@@ -27,7 +27,7 @@ class IntegrationTest {
         System.setIn(in);
         System.setOut(new PrintStream(out));
 
-        connectionString = IntegrationTest.testProperties.getDatabaseConnectionString();
+        connectionString = IntegrationTest.databaseProperties.getDatabaseConnectionString();
     }
 
     @Test
